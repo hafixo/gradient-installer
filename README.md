@@ -60,7 +60,7 @@ Create an IAM user / role with the following policy and get an ACCESS_KEY and SE
 ```
 
 ### 3. Setup shared file storage
-A shared file server is used to share files across workers.
+A shared file server is used to share files across workers. The AWS version of this installer will take care of this for you, but if you're using the VM/bare metal version you will need to set this up on your own.
 
 Currently supported: 
 - efs
@@ -121,7 +121,7 @@ Example:
 - CNAME RECORD gradient.mycompany.com [ELB_HOSTNAME]
 
 ### Hot nodes
-By default, hot nodes are set up for experiments, model deployment, notebook, and tensorboards. Hot nodes can be configured by setting k8s_node_asg_min_sizes
+By default, hot nodes are set up for experiments, model deployments, notebooks, and tensorboards. Hot nodes can be configured by setting k8s_node_asg_min_sizes.
 
 Here are the current defaults:
 ```
@@ -155,7 +155,7 @@ Here are the current defaults:
 ## Installing Gradient on VM / baremetal
 Requirements
 - Ubuntu 18.04
-- Ensure your SSH public key is installed on each hosts
+- Ensure your SSH public key is installed on each host
 - Ensure sudo is enabled for the account you're logging into
 
 ### Create a main.tf file in the gradient-cluster folder
@@ -206,7 +206,7 @@ module "gradient_metal" {
 ```
 
 ### Install and run Gradient
-This will configure your bare metal machines and install and run Gradient
+This will configure your VM instances or bare metal machines and install and run Gradient
 ```sh
 terraform init
 terraform apply
