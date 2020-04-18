@@ -1,0 +1,4 @@
+.terraform
+gradient-kubeconfig
+plugins
+terraform.tfstate
