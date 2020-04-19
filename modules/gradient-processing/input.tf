@@ -56,9 +56,10 @@ variable "elastic_search_host" {
     description = "Elastic search host"
     default = "b35b1cdf227c418b8353fd3b282527c5.us-east-1.aws.found.io"
 }
+# write only key
 variable "elastic_search_password" {
     description = "Elastic search password"
-    default = "Rd9zjAWFWMMj5skOxeV7arv6"
+    default = "6qKRFJHBXygLfTtLTTnn2!yH"
 }
 variable "elastic_search_port" {
     description = "Elastic search port"
@@ -66,7 +67,7 @@ variable "elastic_search_port" {
 }
 variable "elastic_search_user" {
     description = "Elastic search user"
-    default = "elastic"
+    default = "gradient"
 }
 
 variable "enabled" {

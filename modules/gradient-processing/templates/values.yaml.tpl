@@ -45,6 +45,16 @@ efs-provisioner:
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
 
+fluent-bit:
+  rawConfig: |-
+    # used to trigger changes
+    elasticSearch:
+        host: ${elastic_search_host}
+        password: ${elastic_search_password}
+        port: ${elastic_search_port}
+        user: ${elastic_search_user}
+
+
 gradient-operator:
   config:
     ingressHost: ${domain}
