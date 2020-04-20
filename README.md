@@ -87,11 +87,12 @@ cd gradient-cluster
 module "gradient_aws" {
     source = "../gradient-terraform/gradient-aws"
 
+    // name should only have letters, numbers, and dashes
     name = "cluster-name"
     aws_region = "us-east-1"
 
     artifacts_access_key_id = "artifacts-access-key-id"
-    artifacts_path = "s3://artifacts-bucket/sub-path"
+    artifacts_path = "s3://artifacts-bucket"
     artifacts_secret_access_key = "artifacts-secret-access-key"
     
     cluster_apikey = "cluster-apikey-from-paperspace-com"
@@ -115,7 +116,7 @@ terraform apply
 ```
 
 ### DNS
-Gradient requires two DNS records to make external services accessible. A dynamic ELB will created and a hostname will be shown after install.
+Gradient requires two DNS records to make external services accessible. A dynamic ELB will created and a hostname will be shown after install that you can create records on your DNS provider (Cloudflare, Route 53, )
 Example:
 - CNAME RECORD *.gradient.mycompany.com [ELB_HOSTNAME]
 - CNAME RECORD gradient.mycompany.com [ELB_HOSTNAME]
@@ -163,9 +164,10 @@ Requirements
 module "gradient_metal" {
     source = "../gradient-terraform/gradient-metal"
 
+    // name should only have letters, numbers, and dashes
     name = "cluster-name"
     artifacts_access_key_id = "artifacts-access-key-id"
-    artifacts_path = "s3://artifacts-bucket/sub-path"
+    artifacts_path = "s3://artifacts-bucket"
     artifacts_secret_access_key = "artifacts-secret-access-key"
     
     cluster_apikey = "cluster-apikey-from-paperspace-com"
@@ -234,6 +236,9 @@ A kubeconfig will be written to the directory of main.tf, the default is: gradie
 
 ### Terraform state file
 Terraform state is written to the same directory as your main.tf file. This manages the state of your cluster and is required to manage the ongoing state of your cluster.
+
+### Upgrading
+By default, the latest version of Gradient Processing is installed every time you run: terraform-apply
 
 ### Uninstalling Gradient
 ```sh
