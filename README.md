@@ -176,14 +176,18 @@ Requirements
 ```
 The following is an example of how the added line appears in the JSON file. Do not remove any pre-existing content when making this change.
 {
-  "default-runtime": "nvidia",
-  "runtimes": {
-     "nvidia": {
-         "path": "/usr/bin/nvidia-container-runtime",
-         "runtimeArgs": []
-     }
- }
+    "default-runtime": "nvidia",
+    "runtimes": {
+        "nvidia": {
+            "path": "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    }
 }
+```
+- Ensure your SSH user has access to the docker group in /etc/group:
+```
+docker:x:999:ubuntu
 ```
 - Ensure your SSH public key is installed on each host
 - Ensure sudo is enabled for the account you're logging into
