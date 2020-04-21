@@ -187,7 +187,7 @@ The following is an example of how the added line appears in the JSON file. Do n
 ```
 - Ensure your SSH public key is installed on each host
 - Ensure sudo is enabled for the account you're logging into
-- Ensure /etc/sshd/sshd_config has the following setting and that you have reload ssh
+- Ensure /etc/sshd/sshd_config has the following setting (and reload: service ssh reload)
 ```
 AllowTcpForwarding yes
 ```
