@@ -43,25 +43,25 @@ locals {
 
         "experiment-cpu-small"="c5.xlarge",
         "experiment-cpu-medium"="c5.4xlarge",
-        "experiment-gpu-small"="p3.2xlarge",
+        "experiment-gpu-small"="p2.xlarge",
         "experiment-gpu-medium"="p3.2xlarge",
         "experiment-gpu-large"="p3.16xlarge",
 
         "model-deployment-cpu-small"="c5.xlarge",
         "model-deployment-cpu-medium"="c5.4xlarge",
-        "model-deployment-gpu-small"="p3.2xlarge",
+        "model-deployment-gpu-small"="p2.xlarge",
         "model-deployment-gpu-medium"="p3.2xlarge",
         "model-deployment-gpu-large"="p3.16xlarge",
 
         "notebook-cpu-small"="c5.xlarge",
         "notebook-cpu-medium"="c5.4xlarge",
-        "notebook-gpu-small"="p3.2xlarge",
+        "notebook-gpu-small"="p2.xlarge",
         "notebook-gpu-medium"="p3.2xlarge",
         "notebook-gpu-large"="p3.16xlarge",
 
         "tensorboard-cpu-small"="c5.xlarge",
         "tensorboard-cpu-medium"="c5.4xlarge",
-        "tensorboard-gpu-small"="p3.2xlarge",
+        "tensorboard-gpu-small"="p2.xlarge",
         "tensorboard-gpu-medium"="p3.2xlarge",
         "tensorboard-gpu-large"="p3.16xlarge",
     }, var.node_instance_types)
