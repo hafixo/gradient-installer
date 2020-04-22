@@ -137,6 +137,8 @@ Example:
 ### KUBECONFIG
 For using the generated KUBECONFIG, EKS requires aws-iam-authenticator to be installed: https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
 
+Do not remove the cluster creater user or by default you won't have access to kubernetes and you will need to SSH in to add new IAM users.
+
 ### Hot nodes
 By default, hot nodes are set up for experiments, model deployments, notebooks, and tensorboards. Hot nodes can be configured by setting k8s_node_asg_min_sizes.
 
