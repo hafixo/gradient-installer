@@ -24,7 +24,8 @@ variable "cluster_apikey" {
 }
 
 variable "traefik_prometheus_auth" {
-  description = "Traefik basic auth for ingress"
+  description = "Traefik basic auth for ingress `htpasswd user:pass`"
+  default = ""
 }
 
 variable "cluster_handle" {

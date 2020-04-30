@@ -111,7 +111,7 @@ module "gradient_aws" {
     
     cluster_apikey = "cluster-apikey-from-paperspace-com"
     cluster_handle = "cluster-handle-from-paperspace-com"
-    traefik_prometheus_auth = "htpasswd cluster_handle:cluster_apikey"
+    traefik_prometheus_auth = "htpasswd user:pass" //optional
     domain = "gradient.mycompany.com"
 
     tls_cert = replace(file("./certs/ssl-bundle.crt"), "\n", "\\n")
@@ -213,7 +213,7 @@ module "gradient_metal" {
     
     cluster_apikey = "cluster-apikey-from-paperspace-com"
     cluster_handle = "cluster-handle-from-paperspace-com"
-    traefik_prometheus_auth = "htpasswd cluster_handle:cluster_apikey"
+    traefik_prometheus_auth = "htpasswd user:pass" //optional
     domain = "gradient.mycompany.com"
     global_selector = "metal"
 

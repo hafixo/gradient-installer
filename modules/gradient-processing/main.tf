@@ -54,6 +54,7 @@ resource "helm_release" "gradient_processing" {
             tls_secret_name = local.tls_secret_name
             use_pod_anti_affinity = var.use_pod_anti_affinity
             traefik_prometheus_auth = var.traefik_prometheus_auth
+            traefik_prometheus_auth_enabled = var.traefik_prometheus_auth != ""
         })
     ]
 }
