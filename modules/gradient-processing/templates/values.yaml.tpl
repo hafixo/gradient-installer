@@ -37,6 +37,7 @@ secrets:
   clusterApikey: ${cluster_apikey}
   tlsCert: "${tls_cert}"
   tlsKey: "${tls_key}"
+  traefikPrometheusAuth: ${traefik_prometheus_auth}
 
 cluster-autoscaler:
   enabled: ${cluster_autoscaler_enabled}
@@ -187,6 +188,7 @@ prometheus:
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
   server:
+    enabled: ${traefik_prometheus_auth_enabled}
     ingress:
       hosts:
         - ${domain}

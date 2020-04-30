@@ -67,6 +67,12 @@ variable "amqp_protocol" {
 variable "cluster_apikey" {
     description = "Gradient cluster API key"
 }
+
+variable "traefik_prometheus_auth" {
+  description = "Traefik basic auth for ingress `htpasswd user:pass`"
+  default = ""
+}
+
 variable "cluster_handle" {
     description = "Gradient cluster API handle"
 }
