@@ -22,6 +22,11 @@ variable "availability_zone_count" {
 variable "cluster_apikey" {
     description = "Gradient cluster API key"
 }
+
+variable "traefik_prometheus_auth" {
+  description = "Traefik basic auth for ingress"
+}
+
 variable "cluster_handle" {
     description = "Gradient cluster API handle"
 }
