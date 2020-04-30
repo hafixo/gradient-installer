@@ -17,9 +17,20 @@ global:
   ingressHost: ${domain}
   serviceNodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
-  sharedStoragePath: ${shared_storage_path}
-  sharedStorageServer: ${shared_storage_server}
-  sharedStorageType: ${shared_storage_type}
+
+  defaultStorageName: ${default_storage_name}
+  sharedStorageName: ${shared_storage_name}
+  storage:
+    gradient-processing-local:
+      class: gradient-processing-local
+      path: ${local_storage_path}
+      server: ${local_storage_server}
+      type: ${local_storage_type}
+    gradient-processing-shared:
+      class: gradient-processing-shared
+      path: ${shared_storage_path}
+      server: ${shared_storage_server}
+      type: ${shared_storage_type}
 
 secrets: 
   amqpUri: ${amqp_uri}

@@ -102,6 +102,7 @@ module "gradient_processing" {
     artifacts_object_storage_endpoint = var.artifacts_object_storage_endpoint
     artifacts_path = var.artifacts_path
     artifacts_secret_access_key = var.artifacts_secret_access_key
+    chart = var.gradient_processing_chart
     cluster_apikey = var.cluster_apikey
     cluster_autoscaler_enabled = true
     cluster_handle = var.cluster_handle
@@ -111,6 +112,7 @@ module "gradient_processing" {
     gradient_processing_version = var.gradient_processing_version
     name = var.name
     sentry_dsn = var.sentry_dsn
+    local_storage_type = "AWSEBS"
     shared_storage_path = var.shared_storage_path
     shared_storage_server = local.has_shared_storage ? var.shared_storage_server : module.storage.shared_storage_dns_name
     shared_storage_type = var.shared_storage_type

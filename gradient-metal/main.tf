@@ -16,6 +16,9 @@ module "kubernetes" {
 	name = var.name
 	k8s_version = var.k8s_version
 	kubeconfig_path = var.kubeconfig_path
+    kubelet_extra_binds = [
+        "${var.local_storage_path}:${var.local_storage_path}"
+    ]
     master_ips = var.k8s_master_ips
     master_pool_type = local.master_pool_type
     service_pool_name = local.service_pool_name
@@ -67,28 +70,31 @@ module "gradient_processing" {
 	source = "../modules/gradient-processing"
     enabled = module.kubernetes.k8s_host == "" ? false : true
 
-	amqp_hostname = var.amqp_hostname
-	amqp_port = var.amqp_port
-	amqp_protocol = var.amqp_protocol
-	artifacts_access_key_id = var.artifacts_access_key_id
-	artifacts_object_storage_endpoint = var.artifacts_object_storage_endpoint
-	artifacts_path = var.artifacts_path
-	artifacts_secret_access_key = var.artifacts_secret_access_key
-	cluster_apikey = var.cluster_apikey
-	cluster_handle = var.cluster_handle
-	domain = var.domain
+    amqp_hostname = var.amqp_hostname
+    amqp_port = var.amqp_port
+    amqp_protocol = var.amqp_protocol
+    artifacts_access_key_id = var.artifacts_access_key_id
+    artifacts_object_storage_endpoint = var.artifacts_object_storage_endpoint
+    artifacts_path = var.artifacts_path
+    artifacts_secret_access_key = var.artifacts_secret_access_key
+    chart = var.gradient_processing_chart
+    cluster_apikey = var.cluster_apikey
+    cluster_handle = var.cluster_handle
+    domain = var.domain
     global_selector = var.global_selector
     label_selector_cpu = local.label_selector_cpu
     label_selector_gpu = local.label_selector_gpu
-	logs_host = var.logs_host
-	gradient_processing_version = var.gradient_processing_version
-	name = var.name
-	sentry_dsn = var.sentry_dsn
+    local_storage_path = var.local_storage_path
+    local_storage_type = "HostPath"
+    logs_host = var.logs_host
+    gradient_processing_version = var.gradient_processing_version
+    name = var.name
+    sentry_dsn = var.sentry_dsn
     service_pool_name = local.service_pool_name
     shared_storage_server = var.shared_storage_server
-	shared_storage_path = var.shared_storage_path
-	shared_storage_type = var.shared_storage_type
-	tls_cert = var.tls_cert
-	tls_key = var.tls_key
+    shared_storage_path = var.shared_storage_path
+    shared_storage_type = var.shared_storage_type
+    tls_cert = var.tls_cert
+    tls_key = var.tls_key
     use_pod_anti_affinity = var.use_pod_anti_affinity
 }

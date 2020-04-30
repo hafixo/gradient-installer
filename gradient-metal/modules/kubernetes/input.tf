@@ -16,6 +16,11 @@ variable "kubeconfig_path" {
     description = "kubeconfig path"
 }
 
+variable "kubelet_extra_binds" {
+    type = list
+    description = "Kubelet extra binds"
+}
+
 variable "master_ips" {
     type = list
     description = "Kubernetes master ips"

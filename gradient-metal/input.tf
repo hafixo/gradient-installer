@@ -80,6 +80,24 @@ variable "global_selector" {
     default = ""
 }
 
+variable "gradient_processing_chart" {
+    description = "Gradient processing chart"
+    default = "gradient-processing"
+}
+
+variable "local_storage_path" {
+    description = "Local storage path on nodes"
+    default = "/tmp/gradient"
+}
+variable "local_storage_server" {
+    description = "Local storage server"
+    default = ""
+}
+variable "local_storage_type" {
+    description = "Local storage type"
+    default = "HostPath"
+}
+
 variable "setup_docker" {
     description = "Setup docker"
     default = false
