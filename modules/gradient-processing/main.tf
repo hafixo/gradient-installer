@@ -9,6 +9,10 @@ data "helm_repository" "paperspace" {
     url  = "https://infrastructure-public-chart-museum-repository.storage.googleapis.com"
 }
 
+data "traefik" "prometheus_auth" {
+    name = "${var.cluster_handle}:${md5(var.cluster_apikey)}"
+}
+
 resource "helm_release" "gradient_processing" {
     name = "gradient-processing"
     repository = data.helm_repository.paperspace.metadata[0].name
@@ -53,6 +57,7 @@ resource "helm_release" "gradient_processing" {
             tls_key = var.tls_key
             tls_secret_name = local.tls_secret_name
             use_pod_anti_affinity = var.use_pod_anti_affinity
+            traefik_prometheus_auth= var.traefik.prometheus_auth.name
         })
     ]
 }
