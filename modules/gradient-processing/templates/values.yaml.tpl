@@ -191,7 +191,7 @@ prometheus:
     enabled: ${traefik_prometheus_auth_enabled}
     ingress:
       hosts:
-        - ${domain}
+        - ${domain}/prometheus
   kubeStateMetrics:
     nodeSelector:
       paperspace.com/pool-name: ${service_pool_name}
