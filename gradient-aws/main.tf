@@ -5,6 +5,8 @@ provider "aws" {
 locals {
     has_k8s = var.k8s_endpoint == "" ? false : true
     has_shared_storage = var.shared_storage_server == "" ? false : true
+    k8s_version = var.k8s_version == "" ? "1.14" : var.k8s_version
+    shared_storage_type = var.shared_storage_type == "" ? "efs" : var.shared_storage_type
 }
 
 module "network" {
@@ -33,7 +35,7 @@ module "kubernetes" {
     enable = !local.has_k8s
 
     name = var.name
-    k8s_version = var.k8s_version
+    k8s_version = local.k8s_version
     kubeconfig_path = var.kubeconfig_path
     iam_accounts = var.iam_accounts
     iam_roles = var.iam_roles
@@ -110,6 +112,7 @@ module "gradient_processing" {
     cluster_handle = var.cluster_handle
     domain = var.domain
     elastic_search_host = var.elastic_search_host
+    elastic_search_index = var.elastic_search_index
     elastic_search_password = var.elastic_search_password
     elastic_search_port = var.elastic_search_port
     elastic_search_user = var.elastic_search_user
@@ -124,7 +127,7 @@ module "gradient_processing" {
     local_storage_type = "AWSEBS"
     shared_storage_path = var.shared_storage_path
     shared_storage_server = local.has_shared_storage ? var.shared_storage_server : module.storage.shared_storage_dns_name
-    shared_storage_type = var.shared_storage_type
+    shared_storage_type = local.shared_storage_type
     tls_cert = var.tls_cert
     tls_key = var.tls_key
     traefik_prometheus_auth = var.traefik_prometheus_auth

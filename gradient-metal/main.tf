@@ -6,6 +6,7 @@ locals {
     label_selector_gpu = local.is_single_node == true ? var.global_selector : "${var.global_selector}-gpu"
     master_pool_type = local.is_single_node == true ? "gpu" : "cpu"
     service_pool_name = local.is_single_node == true && var.global_selector != "" ? var.global_selector : var.service_pool_name
+    k8s_version = var.k8s_version == "" ? "1.15.11" : var.k8s_version
 }
 
 // Kubernetes
@@ -14,7 +15,7 @@ module "kubernetes" {
 	enable = !local.has_k8s
 
 	name = var.name
-	k8s_version = var.k8s_version
+	k8s_version = local.k8s_version
 	kubeconfig_path = var.kubeconfig_path
     kubelet_extra_binds = [
         "${var.local_storage_path}:${var.local_storage_path}"
@@ -88,6 +89,7 @@ module "gradient_processing" {
     helm_repo_password = var.helm_repo_password
     helm_repo_url = var.helm_repo_url
     elastic_search_host = var.elastic_search_host
+    elastic_search_index = var.elastic_search_index
     elastic_search_password = var.elastic_search_password
     elastic_search_port = var.elastic_search_port
     elastic_search_user = var.elastic_search_user
