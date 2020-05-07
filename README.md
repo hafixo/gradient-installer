@@ -1,4 +1,4 @@
-# Gradient Terraform
+# Gradient Installer
 
 Installer for Paperspace Gradient processing site
 
