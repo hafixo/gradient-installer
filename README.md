@@ -73,10 +73,10 @@ Gradient uses a wildcard SSL certificate to secure HTTP traffic into your proces
 Example:
 - *.gradient.mycompany.com
 
-### 5. Setup gradient-terraform
+### 5. Setup gradient-installer
 ```
-git clone git@github.com:Paperspace/gradient-terraform.git gradient-terraform
-gradient-terraform/bin/setup
+git clone git@github.com:Paperspace/gradient-installer.git gradient-installer
+gradient-installer/bin/setup
 mkdir gradient-cluster
 cd gradient-cluster
 ```
@@ -99,7 +99,7 @@ terraform {
 ### Create a main.tf file in the gradient-cluster folder
 ```
 module "gradient_aws" {
-    source = "github.com/paperspace/gradient-terraform?ref=master/gradient-aws"
+    source = "github.com/paperspace/gradient-installer?ref=master/gradient-aws"
 
     // name should only have letters, numbers, and dashes
     name = "cluster-name"
@@ -202,7 +202,7 @@ AllowTcpForwarding yes
 ### Create a main.tf file in the gradient-cluster folder
 ```
 module "gradient_metal" {
-    source = "github.com/paperspace/gradient-terraform?ref=master/gradient-metal"
+    source = "github.com/paperspace/gradient-installer?ref=master/gradient-metal"
 
     // name should only have letters, numbers, and dashes
     name = "cluster-name"
