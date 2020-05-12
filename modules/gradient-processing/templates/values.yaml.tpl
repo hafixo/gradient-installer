@@ -43,7 +43,7 @@ efs-provisioner:
   enabled: ${efs_provisioner_enabled}
   efsProvisioner:
     awsRegion: ${aws_region}
-    efsFileSystemId: ${split(".", shared_storage_server)[0]}
+    efsFileSystemId: "${split(".", shared_storage_server)[0]}"
     path: ${shared_storage_path}
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
