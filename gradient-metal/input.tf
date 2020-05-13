@@ -3,9 +3,9 @@ variable "become_ssh_user" {
     default = "root"
 }
 
-variable "k8s_master_ips" {
+variable "k8s_master_nodes" {
     type = list
-    description = "Kubernetes master ips"
+    description = "Kubernetes master nodes"
 }
 
 variable "k8s_workers" {
@@ -28,10 +28,13 @@ variable "ssh_user" {
     default = "ubuntu"
 }
 
-
-variable "global_selector" {
-    description = "Node selector prefix used globally"
-    default = ""
+variable "cpu_selector" {
+    description = "Node CPU selector"
+    default = "metal-cpu"
+}
+variable "gpu_selector" {
+    description = "Node GPU selector"
+    default = "metal-gpu"
 }
 
 variable "local_storage_path" {
