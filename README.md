@@ -21,4 +21,4 @@ The installation process includes several pre-installation steps that apply to a
 After that, each installation mode requires that a main.tf file is generated and applied via Terraform. The update and uninstall processes are also a little different for each install mode.
 
 All of these steps are documented in detail here:
-https://docs.paperspace.com/gradient/gradient-private-cloud (https://docs.paperspace.com/gradient/gradient-private-cloud/)
+https://docs.paperspace.com/gradient/gradient-private-cloud/about
