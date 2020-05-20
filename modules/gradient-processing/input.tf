@@ -13,11 +13,6 @@ variable "amqp_protocol" {
     default = "amqps"
 }
 
-# AWS
-variable "aws_region" {
-    description = "AWS region"
-    default = "us-east-1"
-}
 
 # Cluster
 variable "artifacts_access_key_id" {
@@ -36,6 +31,16 @@ variable "artifacts_secret_access_key" {
     description = "S3 compatible access key for artifacts object storage"
 }
 
+variable "aws_certificate_arn" {
+    description = "AWS certificate ARN"
+    default = ""
+}
+
+variable "aws_region" {
+    description = "AWS region"
+    default = "us-east-1"
+}
+
 variable "chart" {
     description = "Helm chart for gradient-processing"
     default = "gradient-processing"
@@ -43,10 +48,6 @@ variable "chart" {
 
 variable "cluster_apikey" {
   description = "Gradient cluster apikey"
-}
-
-variable "traefik_prometheus_auth" {
-  description = "Traefik basic auth for ingress `htpasswd user:pass`"
 }
 
 variable "cluster_autoscaler_enabled" {
@@ -92,7 +93,6 @@ variable "global_selector" {
     default = ""
 }
 
-
 variable "gradient_processing_version" {
   description = "Gradient processing version"
 }
@@ -105,6 +105,15 @@ variable "label_selector_cpu" {
 variable "label_selector_gpu" {
   description = "Node selector for gpu"
   default = ""
+}
+
+variable "letsencrypt_dns_name" {
+  description = "letsencrypt dns name"
+}
+
+variable "letsencrypt_dns_settings" {
+  type = map
+  description = "letsencrypt dns settings"
 }
 
 variable "logs_host" {

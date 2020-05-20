@@ -50,6 +50,19 @@ module "kubernetes" {
     write_kubeconfig = var.write_kubeconfig
 }
 
+
+resource "aws_acm_certificate" "main" {
+    count = var.tls_cert == "" ? 1 : 0
+    
+    domain_name = "*.${var.domain}"
+    validation_method = "DNS"
+    subject_alternative_names = [var.domain]
+
+    lifecycle {
+        create_before_destroy = true
+    }
+}
+
 # Storage
 module "storage" {
   source = "./modules/storage"
@@ -102,6 +115,7 @@ module "gradient_processing" {
     amqp_port = var.amqp_port
     amqp_protocol = var.amqp_protocol
     aws_region = var.aws_region
+    aws_certificate_arn = var.tls_cert == "" ? aws_acm_certificate.main[0].id : ""
     artifacts_access_key_id = var.artifacts_access_key_id
     artifacts_object_storage_endpoint = var.artifacts_object_storage_endpoint
     artifacts_path = var.artifacts_path
@@ -119,6 +133,8 @@ module "gradient_processing" {
     helm_repo_username = var.helm_repo_username
     helm_repo_password = var.helm_repo_password
     helm_repo_url = var.helm_repo_url
+    letsencrypt_dns_name = var.letsencrypt_dns_name
+    letsencrypt_dns_settings = var.letsencrypt_dns_settings
     logs_host = var.logs_host
 
     gradient_processing_version = var.gradient_processing_version
@@ -130,9 +146,12 @@ module "gradient_processing" {
     shared_storage_type = local.shared_storage_type
     tls_cert = var.tls_cert
     tls_key = var.tls_key
-    traefik_prometheus_auth = var.traefik_prometheus_auth
 }
 
 output "elb_hostname" {
     value = module.gradient_processing.traefik_service.load_balancer_ingress[0].hostname
+}
+
+output "ssl_dns_record" {
+    value = var.tls_cert == "" ? "${aws_acm_certificate.main[0].domain_validation_options[0]["resource_record_name"]} ${aws_acm_certificate.main[0].domain_validation_options[0]["resource_record_value"]}" : ""
 }

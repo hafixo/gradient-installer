@@ -110,6 +110,16 @@ variable "kubeconfig_path" {
     default = "./gradient-kubeconfig"
 }
 
+variable "letsencrypt_dns_name" {
+    description = "letsencrypt dns provider name"
+    default = "default"
+}
+variable "letsencrypt_dns_settings" {
+    type = map
+    description = "letsencrypt settings"
+    default = {}
+}
+
 variable "name" {
     description = "Name"
 }

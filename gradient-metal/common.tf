@@ -110,6 +110,16 @@ variable "kubeconfig_path" {
     default = "./gradient-kubeconfig"
 }
 
+variable "letsencrypt_dns_name" {
+    description = "letsencrypt dns provider name"
+    default = "default"
+}
+variable "letsencrypt_dns_settings" {
+    type = map
+    description = "letsencrypt settings"
+    default = {}
+}
+
 variable "name" {
     description = "Name"
 }
@@ -134,7 +144,7 @@ variable "shared_storage_path" {
 }
 variable "shared_storage_type" {
     description = "Shared storage type"
-    default = "nfs"
+    default = ""
 }
 
 variable "tls_cert" {

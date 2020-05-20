@@ -1,7 +1,9 @@
 locals {
+    letsencrypt_enabled = (length(var.letsencrypt_dns_settings) != 0 && (var.tls_cert == "" && var.tls_key == ""))
     local_storage_name = "gradient-processing-local"
     helm_repo_url = var.helm_repo_url == "" ? "https://infrastructure-public-chart-museum-repository.storage.googleapis.com" : var.helm_repo_url
     shared_storage_name = "gradient-processing-shared"
+    trafeik_ssl_enabled = ((var.tls_cert != "" && var.tls_cert != "") || (var.label_selector_cpu != "" && var.label_selector_gpu != "" ))
     tls_secret_name = "gradient-processing-tls"
 }
 
@@ -10,7 +12,7 @@ resource "helm_release" "gradient_processing" {
     repository = local.helm_repo_url
     repository_username = var.helm_repo_username
     repository_password = var.helm_repo_password
-    chart      = var.chart
+    chart = var.chart
     version = var.gradient_processing_version
 
     set_sensitive {
@@ -41,9 +43,25 @@ resource "helm_release" "gradient_processing" {
         name  = "secrets.tlsKey"
         value = var.tls_key
     }
+
     set_sensitive {
-        name  = "secrets.traefikPrometheusAuth"
-        value = var.traefik_prometheus_auth
+        name = "traefik.acme.dnsProvider.name"
+        value = var.letsencrypt_dns_name
+    }
+    set {
+        name = "traefik.ssl.enabled"
+        value = local.trafeik_ssl_enabled
+    }
+
+
+
+    dynamic "set_sensitive" {
+        for_each = var.letsencrypt_dns_settings
+
+        content {
+            name = "traefik.acme.dnsProvider.${var.letsencrypt_dns_name}.${set_sensitive.key}"
+            value = set_sensitive.value
+        }
     }
 
     values = [
@@ -51,6 +69,7 @@ resource "helm_release" "gradient_processing" {
             enabled = var.enabled
 
             aws_region = var.aws_region
+            aws_certificate_arn = var.aws_certificate_arn
             artifacts_path = var.artifacts_path
             cluster_autoscaler_enabled = var.cluster_autoscaler_enabled
             cluster_handle = var.cluster_handle
@@ -66,6 +85,7 @@ resource "helm_release" "gradient_processing" {
             global_selector = var.global_selector
             label_selector_cpu = var.label_selector_cpu
             label_selector_gpu = var.label_selector_gpu
+            letsencrypt_enabled = local.letsencrypt_enabled
             local_storage_name = local.local_storage_name
             local_storage_path = var.local_storage_path
             local_storage_server = var.local_storage_server
@@ -81,7 +101,6 @@ resource "helm_release" "gradient_processing" {
             shared_storage_type = var.shared_storage_type
             tls_secret_name = local.tls_secret_name
             use_pod_anti_affinity = var.use_pod_anti_affinity
-            traefik_prometheus_auth_enabled = var.traefik_prometheus_auth != ""
         })
     ]
 }

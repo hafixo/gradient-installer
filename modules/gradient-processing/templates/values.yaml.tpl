@@ -1,5 +1,7 @@
 global:
   amqpExchange: ${cluster_handle}
+  awsCertificateARN: ${aws_certificate_arn}
+
   artifactsPath: ${artifacts_path}
   cluster:
     handle: ${cluster_handle}
@@ -153,10 +155,6 @@ gradient-metrics:
   ingress:
     hostPath:
       ${domain}: /metrics
-    tls:
-      - secretName: ${tls_secret_name}
-        hosts:
-          - ${domain}
 
 gradient-operator-dispatcher:
   config:
@@ -175,7 +173,6 @@ prometheus:
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
   server:
-    enabled: ${traefik_prometheus_auth_enabled}
     ingress:
       hosts:
         - ${domain}/prometheus
@@ -187,17 +184,24 @@ prom-aggregation-gateway:
   ingress:
     hostPath:
       ${domain}: /gateway
-    tls:
-    - secretName: ${tls_secret_name}
-      hosts:
-      - ${domain}
 
 traefik:
   replicas: 1
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
+
+  %{ if aws_certificate_arn != "" }
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: ${aws_certificate_arn}
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https" 
+  %{ endif }
+
   %{ if label_selector_cpu != "" && label_selector_gpu != "" }
   serviceType: NodePort
+  deploymentStrategy:
+    type: Recreate
   deployment:
     hostNetwork: true
     hostPort:
@@ -205,4 +209,24 @@ traefik:
       httpPort: 80
       httpsEnabled: true
       httpsPort: 443
+  %{ endif }
+
+  %{ if letsencrypt_enabled }
+  acme:
+    enabled: true
+    email: "admin@${domain}"
+    onHostRule: true
+    staging: false
+    logging: true
+    domains:
+      enabled: true
+      domainsList:
+        - main: "*.${domain}"
+        - sans: 
+          - ${domain}
+    challengeType: dns-01
+    resolvers:
+      - 8.8.8.8:53
+    persistence:
+      storageClass: ${shared_storage_name}
   %{ endif }
