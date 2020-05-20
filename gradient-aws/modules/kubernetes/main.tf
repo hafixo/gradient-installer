@@ -1,13 +1,13 @@
 data "aws_ami" "eks_cpu" {
     most_recent      = true
-    name_regex       = "^amazon-eks-node-${var.k8s_version}.*"
-    owners = ["602401143452"]
+    name_regex       = "^paperspace_mlops_eks_cpu_${var.k8s_version}.*"
+    owners = ["391847209875"]
 }
 
 data "aws_ami" "eks_gpu" {
     most_recent      = true
-    name_regex       = "^amazon-eks-gpu-node-${var.k8s_version}.*"
-    owners = ["602401143452"]
+    name_regex       = "^paperspace_mlops_eks_gpu_${var.k8s_version}.*"
+    owners = ["391847209875"]
 }
 
 locals {
