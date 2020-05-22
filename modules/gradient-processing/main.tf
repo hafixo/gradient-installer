@@ -3,7 +3,6 @@ locals {
     local_storage_name = "gradient-processing-local"
     helm_repo_url = var.helm_repo_url == "" ? "https://infrastructure-public-chart-museum-repository.storage.googleapis.com" : var.helm_repo_url
     shared_storage_name = "gradient-processing-shared"
-    trafeik_ssl_enabled = ((var.tls_cert != "" && var.tls_cert != "") || (var.label_selector_cpu != "" && var.label_selector_gpu != "" ))
     tls_secret_name = "gradient-processing-tls"
 }
 
@@ -48,12 +47,14 @@ resource "helm_release" "gradient_processing" {
         name = "traefik.acme.dnsProvider.name"
         value = var.letsencrypt_dns_name
     }
-    set {
-        name = "traefik.ssl.enabled"
-        value = local.trafeik_ssl_enabled
+    set_sensitive {
+        name  = "traefik.ssl.defaultCert"
+        value = var.tls_cert == "" ? "null" : base64encode(var.tls_cert)
     }
-
-
+    set_sensitive {
+        name  = "traefik.ssl.defaultKey"
+        value = var.tls_key == "" ? "null" : base64encode(var.tls_key)
+    }
 
     dynamic "set_sensitive" {
         for_each = var.letsencrypt_dns_settings
@@ -69,7 +70,6 @@ resource "helm_release" "gradient_processing" {
             enabled = var.enabled
 
             aws_region = var.aws_region
-            aws_certificate_arn = var.aws_certificate_arn
             artifacts_path = var.artifacts_path
             cluster_autoscaler_enabled = var.cluster_autoscaler_enabled
             cluster_handle = var.cluster_handle
