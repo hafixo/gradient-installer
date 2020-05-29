@@ -15,9 +15,7 @@ module "kubernetes" {
 	name = var.name
 	k8s_version = local.k8s_version
 	kubeconfig_path = var.kubeconfig_path
-    kubelet_extra_binds = [
-        "${var.local_storage_path}:${var.local_storage_path}"
-    ]
+    kubelet_extra_binds = []
     master_node = var.k8s_master_node
     service_pool_name = local.service_pool_name
     setup_docker = var.setup_docker
@@ -95,8 +93,10 @@ module "gradient_processing" {
     label_selector_gpu = var.gpu_selector
     letsencrypt_dns_name = var.letsencrypt_dns_name
     letsencrypt_dns_settings = var.letsencrypt_dns_settings
-    local_storage_path = var.local_storage_path
-    local_storage_type = "HostPath"
+    // Use shared storage by default for now
+    local_storage_server = var.local_storage_server == "" ? var.shared_storage_server : var.local_storage_server
+    local_storage_path = var.local_storage_path == "" ? var.shared_storage_path : var.local_storage_path
+    local_storage_type = var.local_storage_type == "" ? var.shared_storage_type : var.local_storage_type
     logs_host = var.logs_host
     gradient_processing_version = var.gradient_processing_version
     name = var.name
