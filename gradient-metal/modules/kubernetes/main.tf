@@ -64,7 +64,7 @@ resource "null_resource" "rke_nodes_wait" {
     provisioner "remote-exec" {
         inline = [
             "sudo DOCKER_USER=${var.ssh_user} SETUP_DOCKER=${var.setup_docker} sh /tmp/setup-docker.sh",
-            "sudo POOL_TYPE=${local.rke_nodes[count.index]["pool-type"]} SETUP_NVIDIA=${var.setup_nvidia} sh /tmp/setup-nvidia.sh"
+            "sudo POOL_TYPE=${local.rke_nodes[count.index]["pool-type"]} REBOOT=${var.reboot_gpu_nodes} SETUP_NVIDIA=${var.setup_nvidia} sh /tmp/setup-nvidia.sh"
         ]
 
         connection {
@@ -76,7 +76,11 @@ resource "null_resource" "rke_nodes_wait" {
     }
 
     provisioner "local-exec" {
-        command = "echo 'Waiting for ${local.rke_nodes[count.index].ip}'"
+        # sleep to ensure we don't successfully ssh connect to a gpu machine before it starts reboot
+        command = "sleep 5 && echo 'Waiting for ${local.rke_nodes[count.index].ip}'"
+    }
+
+    provisioner "remote-exec" {
         connection {
             type     = "ssh"
             user     = var.ssh_user

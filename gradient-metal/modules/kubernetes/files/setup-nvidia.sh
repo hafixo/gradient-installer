@@ -57,4 +57,9 @@ if [ "$os_id" = "ubuntu" ] || [ "$os_id" = "debian" ];then
         service docker reload
         update_default_runtime
     fi
+
+    if [ "$REBOOT" = "true" ]; then
+        echo "Restarting GPU node..."
+        shutdown --reboot +2 "System is rebooting for nvidia drivers to work" || true
+    fi
 fi
