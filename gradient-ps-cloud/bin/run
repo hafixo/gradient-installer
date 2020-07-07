@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+if [ $IS_MANAGED == "true" ] ; then
+  echo "Configuring managed backend..."
+
+  cat << EOF > ./backend.tf
+terraform {
+    backend "s3" {
+        bucket = "${AWS_BUCKET}"
+        key    = "gradient-processing-ps-cloud-managed"
+        region = "${AWS_DEFAULT_REGION}"
+    }
+}
+EOF
+fi
+
+terraform init
+# terraform apply reads terraform vars from env that are prefixed TF_VARS_
+terraform workspace new $TF_VAR_cluster_handle || true
+terraform workspace select $TF_VAR_cluster_handle
+terraform apply -auto-approve
