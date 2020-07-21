@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/paperspace/gradient-installer/pkg/cli"
@@ -26,9 +25,6 @@ func main() {
 	}
 	if err := config.LoadConfigIfExists("", "config", &cliConfig); err != nil {
 		println(cli.TextError(err.Error()))
-	}
-	if !cliConfig.HasProfile(profileName) {
-		println(cli.TextError(fmt.Sprintf("Config profile is not set up: %s", profileName)))
 	}
 
 	profile := cliConfig.CreateOrGetProfile(profileName)
