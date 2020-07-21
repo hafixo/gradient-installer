@@ -6,6 +6,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/paperspace/gradient-installer/pkg/cli"
+	"github.com/paperspace/gradient-installer/pkg/cli/terraform"
 	"github.com/paperspace/paperspace-go"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -51,7 +52,7 @@ func NewClusterRegisterCommand() *cobra.Command {
 				}
 				platformSelect := promptui.Select{
 					Label: "Platform",
-					Items: paperspace.ClusterPlatforms,
+					Items: terraform.SupportedClusterPlatformTypes,
 				}
 
 				println(cli.TextHeader("Register a private cluster"))

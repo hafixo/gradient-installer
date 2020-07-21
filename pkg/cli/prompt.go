@@ -12,6 +12,7 @@ var maskChar = '*'
 
 type Prompt struct {
 	AllowedValues  []string
+	HideValue bool
 	Label          string
 	MaskShowLength int
 	MaxLength      int
@@ -62,7 +63,10 @@ func (p *Prompt) Run() error {
 		displayValue = "None"
 	}
 
-	promptTextParts = append(promptTextParts, fmt.Sprintf("[%s]", displayValue))
+
+	if !p.HideValue {
+		promptTextParts = append(promptTextParts, fmt.Sprintf("[%s]", displayValue))
+	}
 
 	for {
 		fmt.Printf("%s: ", strings.Join(promptTextParts, " "))

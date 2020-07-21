@@ -98,6 +98,7 @@ func setupMetalConfig(terraformMetal *terraform.Metal) error {
 	for index, workerNode := range terraformMetal.WorkerNodes {
 		workerPrompt := cli.Prompt{
 			Label:         fmt.Sprintf("Remove worker node %d with IP: %s?", index+1, workerNode.IP),
+			HideValue:     true,
 			Required:      true,
 			AllowedValues: cli.YesNoValues,
 		}
@@ -123,6 +124,7 @@ func setupMetalConfig(terraformMetal *terraform.Metal) error {
 		workerPrompt := cli.Prompt{
 			Label:         "Add a worker node?",
 			Required:      true,
+			HideValue:     true,
 			AllowedValues: cli.YesNoValues,
 		}
 
