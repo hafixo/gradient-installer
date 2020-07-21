@@ -39,7 +39,7 @@ jobs:
       - image: golang:1.14
     steps:
       - checkout
-      - run: apt update && apt install jq
+      - run: apt update && apt install jq -y
       - run:
           command: bin/build ${CIRCLE_TAG}
       - run:
