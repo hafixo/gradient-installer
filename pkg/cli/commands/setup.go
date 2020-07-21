@@ -52,7 +52,7 @@ func NewSetupCommand(profileName string) *cobra.Command {
 			return nil
 		},
 	}
-	command.PersistentFlags().BoolVarP(&withTerraform, "with-terraform", "t", false, "Install Terraform dependencies")
+	command.PersistentFlags().BoolVarP(&withTerraform, "with-terraform", "t", false, "install Terraform dependencies")
 
 	return &command
 }
