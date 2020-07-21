@@ -415,7 +415,7 @@ func NewClusterUpCommand() *cobra.Command {
 				return err
 			}
 			if !terraform.IsSupportedPlatform(checkCluster.Platform) {
-				return fmt.Errorf("Platform is not supported by %s", cli.Name)
+				return fmt.Errorf("Platform '%s' is not currently supported by %s", checkCluster.Platform, cli.Name)
 			}
 
 			// Update cluster to regenerate cluster API key
