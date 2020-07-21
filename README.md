@@ -1,28 +1,57 @@
 # Gradient Installer
 
-The Gradient installer is a module that you can run using Terraform that will provision a Gradient processing site cluster on various types of infrastructure. The installer can be configured to be run in different modes: there's an AWS-specific version that creates a Gradient cluster in Amazon's Elastic Kubernetes Service (EKS), and a more generic version that can configure bare metal servers or virtual machines in nearly any environment - including NVIDIA's DGX-1 and Google Cloud's Compute Engine.
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/stripe/stripe-cli)
 
-The Gradient Installer is not a tool that you run directly as a package or install from source; instead, you can simply [follow the docs starting here](https://docs.paperspace.com/gradient/gradient-private-cloud/setup/pre-installation-steps), which will guide you to install a Gradient cluster by using Terraform in conjunction with the base Terraform configuration provided there. That Terraform configuration points to this repo and will thus automatically use this this repo's code as a Terraform module to install your Gradient cluster.
+Gradient Installer is a CLI to setup and manage Gradient private clusters on AWS, NVIDIA DGX-1, and any VM / Bare metal.
 
-To that end, this repo has been open-sourced so that the inner-workings of the installation process are transparent to anyone who wants to install a Gradient cluster.
+Terraform is used under the hood to setup all the infrastructure. Terraform modules can also be used directly to integrate Gradient into an existing Terraform setup.
 
 ### Supported target platforms
-
-- AWS
-- VM / Baremetal
+- AWS EKS
 - NVIDIA DGX-1
+- VM / Bare metal
 
-### General prerequisites
+## Prerequisites
+- A Paperspace account with an appropriate billing plan and API key [https://www.paperspace.com]
+- An AWS S3 bucket to store Terraform state [https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html]
 
-- Terraform 0.12 installed on your computer, or on a cloud instance that has network access to the environment where Gradient will run (not required for DGX installer mode)
-- Technical familiarity with the cloud provider or private cloud environment where you will install and run Gradient
-- SDK or CLI tools installed from your cloud provider, if necessary (e.g. aws-cli, aws-iam-authenticator)
+## Install / Update
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/paperspace/gradient-installer/master/bin/install)"
+```
 
-### Installation
+### Updating Gradient Installer
+```sh
+gradient-installer update
+```
 
-The installation process includes several pre-installation steps that apply to all installation modes. These include setting up an AWS S3 bucket for artifact storage, setting up a SSL certificate, and creating a place to store Terraform state files.
+## Usage
 
-After that, each installation mode requires that a main.tf file is generated and applied via Terraform. The update and uninstall processes are also a little different for each install mode.
+### Setting up a Gradient private cluster
+```sh
+gradient-installer clusters up
+```
 
-All of these steps are documented in detail here:
-https://docs.paperspace.com/gradient/gradient-private-cloud/about
+### Updating existing clusters
+```sh
+gradient-installer clusters up CLUSTER_HANDLE
+```
+
+### Profiles
+The CLI supports multiple profiles, which can be used for different teams. You can use a profile by:
+```sh
+export PAPERSPACE_PROFILE=favorite-team
+gradient-installer setup
+```
+
+## Terraform
+To keep track of your cluster' state, the CLI stores your state file in an S3 bucket.
+Terraform modules can be used directly to create clusters. 
+
+List of available Terraform modules:
+- gradient-aws
+- gradient-metal
+- gradient-ps-cloud
+
+## Documentation
+Full docs: https://docs.paperspace.com/gradient/gradient-private-cloud/about
