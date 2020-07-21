@@ -79,7 +79,7 @@ func NewUpdateCommand() *cobra.Command {
 			}
 
 			// Download latest OS asset
-			resp, err := http.Get(*releaseAsset.URL)
+			resp, err := http.Get(*releaseAsset.BrowserDownloadURL)
 			if err != nil {
 				return err
 			}
@@ -90,6 +90,9 @@ func NewUpdateCommand() *cobra.Command {
 				return err
 			}
 			defer tempFile.Close()
+			if err := tempFile.Chmod(0755); err != nil {
+				return err
+			}
 
 			if _, err := io.Copy(tempFile, resp.Body); err != nil {
 				return err
