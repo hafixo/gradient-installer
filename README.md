@@ -30,6 +30,8 @@ gradient-installer update
 ```sh
 gradient-installer clusters up
 ```
+<img width="633" alt="GradientInstallerCLI-up" src="https://user-images.githubusercontent.com/585865/88327177-cb1d4100-ccf4-11ea-8ea8-2c4966c5dd88.png">
+
 
 ### Updating existing clusters
 ```sh
