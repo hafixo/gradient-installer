@@ -6,7 +6,7 @@ Terraform is used under the hood to setup all the infrastructure. Terraform modu
 
 ### Supported target platforms
 - AWS EKS
-- NVIDIA DGX-1
+- NVIDIA DGX
 - VM / Bare metal
 
 ## Prerequisites
