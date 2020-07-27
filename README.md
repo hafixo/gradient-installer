@@ -1,6 +1,6 @@
 # Gradient Installer
 
-Gradient Installer is a CLI to setup and manage Gradient private clusters on AWS, NVIDIA DGX-1, and any VM / Bare metal.
+Gradient Installer is a CLI to setup and manage Gradient private clusters on AWS, NVIDIA DGX, and any VM / Bare metal.
 
 Terraform is used under the hood to setup all the infrastructure. Terraform modules can also be used directly to integrate Gradient into an existing Terraform setup.
 
