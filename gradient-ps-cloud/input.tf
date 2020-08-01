@@ -133,3 +133,9 @@ variable "team_id" {
 variable "team_id_integer" {
     description = "Cluster team id integer"
 }
+
+variable "workers" {
+    type = list
+    description = "Additional workers"
+    default = []
+}

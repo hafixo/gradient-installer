@@ -260,7 +260,13 @@ module "gradient_metal" {
                 pool-type = "gpu"
                 pool-name = "metal-gpu"
             }
-        ]
+        ],
+        [ for worker in var.workers : {
+            ip = worker["ip"]
+            internal-address = worker["internal-address"]
+            pool-type = worker["machine_type"] == var.machine_type_worker_gpu ? "gpu" : "cpu"
+            pool-name = worker["machine_type"] == var.machine_type_worker_gpu ? "metal-gpu" : "metal-cpu"
+        }]
     )
 
     shared_storage_path = "/srv/gradient"
