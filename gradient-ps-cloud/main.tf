@@ -1,4 +1,18 @@
 locals {
+    asg_types = {
+        "cpu"={},
+        "gpu"={},
+    }
+    asg_max_sizes = merge({
+        "cpu"="10",
+        "gpu"="10"
+    }, var.asg_min_sizes)
+
+    asg_min_sizes = merge({
+        "cpu"="0",
+        "gpu"="0"
+    }, var.asg_min_sizes)
+
     ssh_key_path = "${path.module}/ssh_key"
 }
 
@@ -77,6 +91,33 @@ resource "paperspace_machine" "gradient_main" {
             ${path.module}/ansible/playbook-gradient-metal-ps-cloud-node.yaml
         EOF
     }
+}
+
+resource "paperspace_script" "autoscale" {
+    name = "Autoscale cluster"
+    description = "Autoscales cluster"
+    script_text = <<EOF
+        #!/bin/bash
+        export MACHINE_ID=`curl https://metadata.paperspace.com/meta-data/machine | grep hostname | sed 's/^.*: "\(.*\)".*/\1/'` 
+        curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"$MACHINE_ID"}'
+
+        curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusters/updateCluster -d '{"id":"${var.cluster_handle}", "scale": true}'
+    EOF
+    is_enabled = true
+    run_once = true
+}
+
+resource "paperspace_autoscaling_group" "main" {
+    for_each = local.asg_types
+    
+    name = "${var.cluster_handle}-${each.key}"
+    cluster_id = var.cluster_handle
+    machine_type = each.key == "cpu" ? var.machine_type_worker_cpu : var.machine_count_worker_gpu
+    template_id = each.key == "cpu" ? var.machine_template_id_cpu : var.machine_count_worker_gpu
+    max = var.asg_max_sizes[each.key]
+    min = var.asg_min_sizes[each.key]
+    network_id = paperspace_network.network.handle
+    script_id = paperspace_script.autoscale.handle
 }
 
 resource "paperspace_machine" "gradient_workers_cpu" {
@@ -173,6 +214,9 @@ module "gradient_metal" {
     artifacts_secret_access_key = var.artifacts_secret_access_key
     sentry_dsn = var.sentry_dsn
 
+    cluster_autoscaler_enabled = var.cluster_autoscaler_enabled
+    cluster_autoscaler_image_repository = var.cluster_autoscaler_image_repository
+    cluster_autoscaler_image_tag = var.cluster_autoscaler_image_tag
     cluster_handle = var.cluster_handle
     cluster_apikey = var.cluster_apikey
 

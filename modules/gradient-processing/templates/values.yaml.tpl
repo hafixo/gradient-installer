@@ -33,6 +33,9 @@ global:
 
 cluster-autoscaler:
   enabled: ${cluster_autoscaler_enabled}
+  image:
+    repository: ${cluster_autoscaler_image_repository}
+    tag: ${cluster_autoscaler_image_tag}
 
   awsRegion: ${aws_region}
   autoDiscovery:

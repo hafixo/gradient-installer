@@ -3,6 +3,15 @@ variable "become_ssh_user" {
     default = "root"
 }
 
+variable "cluster_autoscaler_image repository" {
+    description = "Cluster autoscaler image repository"
+    default = ""
+}
+variable "cluster_autoscaler_tag" {
+    description = "Cluster autoscaler image tag"
+    default = ""
+}
+
 variable "k8s_master_node" {
     type = map
     description = "Kubernetes master node"

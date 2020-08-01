@@ -80,6 +80,8 @@ module "gradient_processing" {
     artifacts_secret_access_key = var.artifacts_secret_access_key
     chart = var.gradient_processing_chart
     cluster_apikey = var.cluster_apikey
+    cluster_autoscaler_image_repository = var.cluster_autoscaler_image_repository
+    cluster_autoscaler_image_tag = var.cluster_autoscaler_image_tag
     cluster_handle = var.cluster_handle
     domain = var.domain
 

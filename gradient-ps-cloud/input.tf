@@ -11,6 +11,16 @@ variable "api_host" {
     default = "api.paperspace.io"
 }
 
+variable "asg_max_sizes" {
+    description = "Autoscaling Group max sizes"
+    default = {}
+}
+
+variable "asg_min_sizes" {
+    description = "Autoscaling Group min sizes"
+    default = {}
+}
+
 variable "aws_access_key_id" {
     description = "AWS access key id"
     default = ""
@@ -18,6 +28,20 @@ variable "aws_access_key_id" {
 variable "aws_secret_access_key" {
     description = "AWS secret access key"
     default = ""
+}
+
+variable "cluster_autoscaler_enabled" {
+    description = "Cluster Autoscaler enabled"
+    type = bool
+    default = true
+}
+variable "cluster_autoscaler_image_repository" {
+    description = "Cluster Autoscaler image repository"
+    default = "paperspace/cluster-autoscaler"
+}
+variable "cluster_autoscaler_image_tag" {
+    description = "Cluster Autoscaler image tag"
+    default = "v1.15"
 }
 
 variable "cloudflare_api_key" {

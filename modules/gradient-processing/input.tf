@@ -45,11 +45,21 @@ variable "cluster_apikey" {
   description = "Gradient cluster apikey"
 }
 
+
 variable "cluster_autoscaler_enabled" {
     type = bool
     description = "Enable cluster-autoscaler"
     default = false
 }
+variable "cluster_autoscaler_image_repository" {
+  description = "Cluster autoscaler image repository"
+  default = ""
+}
+variable "cluster_autoscaler_image_tag" {
+  description = "Cluster autoscaler image tag"
+  default = ""
+}
+
 variable "cluster_handle" {
   description = "Gradient cluster handle"
 }
