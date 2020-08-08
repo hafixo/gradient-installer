@@ -114,10 +114,10 @@ resource "paperspace_autoscaling_group" "main" {
     cluster_id = var.cluster_handle
     machine_type = each.key == "cpu" ? var.machine_type_worker_cpu : var.machine_count_worker_gpu
     template_id = each.key == "cpu" ? var.machine_template_id_cpu : var.machine_count_worker_gpu
-    max = var.asg_max_sizes[each.key]
-    min = var.asg_min_sizes[each.key]
+    max = local.asg_max_sizes[each.key]
+    min = local.asg_min_sizes[each.key]
     network_id = paperspace_network.network.handle
-    script_id = paperspace_script.autoscale.handle
+    startup_script_id = paperspace_script.autoscale.id
 }
 
 resource "paperspace_machine" "gradient_workers_cpu" {
@@ -128,7 +128,7 @@ resource "paperspace_machine" "gradient_workers_cpu" {
 
     count = var.machine_count_worker_cpu
     region = var.region
-    name = "${var.cluster_handle}-${var.name}-worker-cpu-${count.index}"
+    name = "${var.cluster_handle}-${var.name}-worker[-cpu-${count.index}"
     machine_type = var.machine_type_worker_cpu
     size = var.machine_storage_worker_cpu
     billing_type = "hourly"

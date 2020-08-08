@@ -3,11 +3,16 @@ variable "become_ssh_user" {
     default = "root"
 }
 
-variable "cluster_autoscaler_image repository" {
+variable "cluster_autoscaler_enabled" {
+    description = "Cluster autoscaler enabled"
+    default = false
+}
+
+variable "cluster_autoscaler_image_repository" {
     description = "Cluster autoscaler image repository"
     default = ""
 }
-variable "cluster_autoscaler_tag" {
+variable "cluster_autoscaler_image_tag" {
     description = "Cluster autoscaler image tag"
     default = ""
 }
