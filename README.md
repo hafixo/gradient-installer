@@ -1,7 +1,6 @@
 # Gradient Installer
 
-<img width="1056" alt="Screen Shot 2020-08-10 at 11 53 39 AM" src="https://user-images.githubusercontent.com/585865/89802960-32623000-db00-11ea-99a6-66e13ff4832e.png">
-
+![combined](https://user-images.githubusercontent.com/585865/89805086-1c09a380-db03-11ea-975f-5c8aa65a26fa.png)
 
 Gradient Installer is a CLI to setup and manage Gradient private clusters on AWS, NVIDIA DGX-1, and any VM / Bare metal.
 
