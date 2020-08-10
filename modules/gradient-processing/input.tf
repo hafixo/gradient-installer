@@ -45,19 +45,19 @@ variable "cluster_apikey" {
   description = "Gradient cluster apikey"
 }
 
-
+variable "cluster_autoscaler_autoscaling_groups" {
+  type = list
+  description = "Cluster autoscaler autoscaling groups"
+  default = []
+}
+variable "cluster_autoscaler_cloudprovider" {
+    description = "Cluster autoscaler provider"
+    default = "aws"
+}
 variable "cluster_autoscaler_enabled" {
-    type = bool
-    description = "Enable cluster-autoscaler"
-    default = false
-}
-variable "cluster_autoscaler_image_repository" {
-  description = "Cluster autoscaler image repository"
-  default = ""
-}
-variable "cluster_autoscaler_image_tag" {
-  description = "Cluster autoscaler image tag"
-  default = ""
+  type = bool
+  description = "Enable cluster autoscaler"
+  default = false
 }
 
 variable "cluster_handle" {

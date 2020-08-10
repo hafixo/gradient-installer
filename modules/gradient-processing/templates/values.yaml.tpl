@@ -34,15 +34,43 @@ global:
 
 cluster-autoscaler:
   enabled: ${cluster_autoscaler_enabled}
+  %{ if cluster_autoscaler_cloudprovider == "paperspace" }
   image:
-    repository: ${cluster_autoscaler_image_repository}
-    tag: ${cluster_autoscaler_image_tag}
+    pullPolicy: Always
+    repository: paperspace/cluster-autoscaler
+    tag: v1.15-beta1
+
+  autoscalingGroups:
+    %{ for autoscaling_group in cluster_autoscaler_autoscaling_groups }
+    - name: ${autoscaling_group["name"]}
+      minSize: ${autoscaling_group["min"]}
+      maxSize: ${autoscaling_group["max"]}
+    %{ endfor }
+  extraEnv:
+    PAPERSPACE_DEBUG: true
+    PAPERSPACE_CLUSTER_ID: ${cluster_handle}
+  extraEnvSecrets:
+    PAPERSPACE_APIKEY:
+      name: gradient-processing
+      key: PS_API_KEY
+
+  %{ endif }
 
   awsRegion: ${aws_region}
   autoDiscovery:
     clusterName: ${name}
+  cloudProvider: ${cluster_autoscaler_cloudprovider}
+
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 efs-provisioner:
   enabled: ${efs_provisioner_enabled}

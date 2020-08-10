@@ -13,6 +13,9 @@ locals {
         "gpu"="0"
     }, var.asg_min_sizes)
 
+    cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
+    cluster_autoscaler_enabled = var.is_managed ? true : false
+
     ssh_key_path = "${path.module}/ssh_key"
 }
 
@@ -97,7 +100,9 @@ resource "paperspace_script" "autoscale" {
     name = "Autoscale cluster"
     description = "Autoscales cluster"
     script_text = <<EOF
-        #!/bin/bash
+        #!/usr/bin/env bash
+
+        echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
         export MACHINE_ID=`curl https://metadata.paperspace.com/meta-data/machine | grep hostname | sed 's/^.*: "\(.*\)".*/\1/'` 
         curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"$MACHINE_ID"}'
 
@@ -112,8 +117,8 @@ resource "paperspace_autoscaling_group" "main" {
     
     name = "${var.cluster_handle}-${each.key}"
     cluster_id = var.cluster_handle
-    machine_type = each.key == "cpu" ? var.machine_type_worker_cpu : var.machine_count_worker_gpu
-    template_id = each.key == "cpu" ? var.machine_template_id_cpu : var.machine_count_worker_gpu
+    machine_type = each.key == "cpu" ? var.machine_type_worker_cpu : var.machine_type_worker_gpu
+    template_id = each.key == "cpu" ? var.machine_template_id_cpu : var.machine_template_id_gpu
     max = local.asg_max_sizes[each.key]
     min = local.asg_min_sizes[each.key]
     network_id = paperspace_network.network.handle
@@ -214,9 +219,13 @@ module "gradient_metal" {
     artifacts_secret_access_key = var.artifacts_secret_access_key
     sentry_dsn = var.sentry_dsn
 
-    cluster_autoscaler_enabled = var.cluster_autoscaler_enabled
-    cluster_autoscaler_image_repository = var.cluster_autoscaler_image_repository
-    cluster_autoscaler_image_tag = var.cluster_autoscaler_image_tag
+    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main : {
+        min: autoscaling_group.min
+        max: autoscaling_group.max
+        name: autoscaling_group.id
+    }]
+    cluster_autoscaler_cloudprovider = local.cluster_autoscaler_cloudprovider
+    cluster_autoscaler_enabled = local.cluster_autoscaler_enabled
     cluster_handle = var.cluster_handle
     cluster_apikey = var.cluster_apikey
 

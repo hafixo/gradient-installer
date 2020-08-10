@@ -30,20 +30,6 @@ variable "aws_secret_access_key" {
     default = ""
 }
 
-variable "cluster_autoscaler_enabled" {
-    description = "Cluster Autoscaler enabled"
-    type = bool
-    default = true
-}
-variable "cluster_autoscaler_image_repository" {
-    description = "Cluster Autoscaler image repository"
-    default = "paperspace/cluster-autoscaler"
-}
-variable "cluster_autoscaler_image_tag" {
-    description = "Cluster Autoscaler image tag"
-    default = "v1.15"
-}
-
 variable "cloudflare_api_key" {
     description = "Cloudflare API key"
     default = ""
@@ -86,7 +72,7 @@ variable "machine_type_main" {
 variable "machine_count_worker_cpu" {
     type = number
     description = "Number of CPU workers"
-    default = 3
+    default = 0
 }
 variable "machine_storage_worker_cpu" {
     type = number
@@ -105,7 +91,7 @@ variable "machine_type_worker_cpu" {
 variable "machine_count_worker_gpu" {
     type = number
     description = "Number of GPU workers"
-    default = 3
+    default = 0
 }
 variable "machine_storage_worker_gpu" {
     type = number

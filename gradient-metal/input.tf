@@ -3,18 +3,18 @@ variable "become_ssh_user" {
     default = "root"
 }
 
+variable "cluster_autoscaler_autoscaling_groups" {
+    type = list
+    description = "Cluster autoscaler autoscaling groups"
+    default = []
+}
+variable "cluster_autoscaler_cloudprovider" {
+    description = "Cluster autoscaler cloud provider"
+    default = ""
+}
 variable "cluster_autoscaler_enabled" {
     description = "Cluster autoscaler enabled"
     default = false
-}
-
-variable "cluster_autoscaler_image_repository" {
-    description = "Cluster autoscaler image repository"
-    default = ""
-}
-variable "cluster_autoscaler_image_tag" {
-    description = "Cluster autoscaler image tag"
-    default = ""
 }
 
 variable "k8s_master_node" {
