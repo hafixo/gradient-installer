@@ -4,11 +4,12 @@
 
 Run the [Gradient MLOps Platform](https://gradient.paperspace.com) anywhere. The Gradient Installer is a CLI to setup and manage [Gradient private clusters](https://docs.paperspace.com/gradient/gradient-private-cloud/setup) on AWS, NVIDIA DGX-1, and any VM / Bare metal.
 
+
 Terraform is used under the hood to setup all the infrastructure. Terraform modules can also be used directly to integrate Gradient into an existing Terraform setup.
 
 ### Supported target platforms
 - AWS EKS
-- NVIDIA DGX-1
+- NVIDIA DGX
 - VM / Bare metal
 - GCP (GKE) *(coming soon)*
 - Azure (AKS) *(coming soon)*
