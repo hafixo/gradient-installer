@@ -102,6 +102,12 @@ resource "paperspace_script" "autoscale" {
     script_text = <<EOF
         #!/usr/bin/env bash
 
+        sudo su -
+
+        until docker ps -a || (( count++ >= 30 )); do echo "Check if docker is up..."; sleep 2; done
+
+        sudo chmod 777 /var/run/docker.sock
+
         echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
         export MACHINE_ID=`curl https://metadata.paperspace.com/meta-data/machine | grep hostname | sed 's/^.*: "\(.*\)".*/\1/'` 
         curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"$MACHINE_ID"}'
