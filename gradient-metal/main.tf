@@ -10,7 +10,7 @@ locals {
 
 // Kubernetes
 module "kubernetes" {
-    source          = "./modules/kubernetes"
+  source = "../modules/kubernetes"
     enable = !local.has_k8s
 
     name = var.name
@@ -114,4 +114,8 @@ module "gradient_processing" {
     tls_cert = var.tls_cert
     tls_key = var.tls_key
     use_pod_anti_affinity = var.use_pod_anti_affinity
+
+  providers = {
+    kubernetes = kubernetes
+  }
 }

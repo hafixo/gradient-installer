@@ -1,218 +1,36 @@
 locals {
-    asg_types = {
-        "cpu"={},
-        "gpu"={},
-    }
-    asg_max_sizes = merge({
-        "cpu"="10",
-        "gpu"="10"
-    }, var.asg_min_sizes)
-
-    asg_min_sizes = merge({
-        "cpu"="0",
-        "gpu"="0"
-    }, var.asg_min_sizes)
-
     cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
     cluster_autoscaler_enabled = var.is_managed ? true : false
-
-    ssh_key_path = "${path.module}/ssh_key"
 }
 
-resource "tls_private_key" "ssh_key" {
-    algorithm = "RSA"
+module "pks" {
+  source = "../pks"
+
+  # TODO fill in and add back variables
+  admin_email        = ""
+  admin_user_api_key = ""
+  autoscaling_groups = []
+  cloudflare         = {}
+  cluster_api_key    = ""
+  cluster_id         = ""
+  master             = {}
+  name               = ""
+  team_id            = ""
+  workers            = []
 }
 
-provider "paperspace" {
-    region = var.region
-    api_key = var.admin_user_api_key
+# TODO fill out from pks output
+provider "kubernetes" {
+  host     = module.kubernetes.k8s_host
+  username = module.kubernetes.k8s_username
+
+  client_certificate     = module.kubernetes.k8s_client_certificate
+  client_key             = module.kubernetes.k8s_client_key
+  cluster_ca_certificate = module.kubernetes.k8s_cluster_ca_certificate
+  load_config_file       = false
 }
 
-data "paperspace_user" "admin" {
-    email = var.admin_email
-    team_id = var.team_id
-}
-
-resource "paperspace_script" "add_public_ssh_key" {
-    name = "Add public SSH key"
-    description = "Add public SSH key on machine create"
-    script_text = <<EOF
-        #!/bin/bash
-        echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
-    EOF
-    is_enabled = true
-    run_once = true
-
-    provisioner "local-exec" {
-        command = <<EOF
-            sleep 20
-        EOF
-    }
-}
-
-resource "paperspace_network" "network" {
-    team_id = var.team_id_integer
-}
-
-resource "paperspace_machine" "gradient_main" {
-    depends_on = [
-        paperspace_script.add_public_ssh_key,
-        tls_private_key.ssh_key,
-    ]
-
-    region = var.region
-    name = "${var.cluster_handle}-${var.name}-main"
-    machine_type = var.machine_type_main
-    size = var.machine_storage_main
-    billing_type = "hourly"
-    assign_public_ip = true
-    template_id = var.machine_template_id_main
-    user_id = data.paperspace_user.admin.id
-    team_id = data.paperspace_user.admin.team_id
-    script_id = paperspace_script.add_public_ssh_key.id
-    network_id = paperspace_network.network.handle
-    live_forever = true
-    is_managed = var.is_managed
-
-    provisioner "remote-exec" {
-        connection {
-            type     = "ssh"
-            user     = "paperspace"
-            host     = self.public_ip_address
-            private_key = tls_private_key.ssh_key.private_key_pem
-        }
-    } 
-
-    provisioner "local-exec" {
-        command = <<EOF
-            echo "${tls_private_key.ssh_key.private_key_pem}" > ${local.ssh_key_path} && chmod 600 ${local.ssh_key_path} && \
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
-            --key-file ${local.ssh_key_path} \
-            -i '${paperspace_machine.gradient_main.public_ip_address},' \
-            -e "install_nfs_server=true" \
-            -e "nfs_subnet_host_with_netmask=${paperspace_network.network.network}/${paperspace_network.network.netmask}" \
-            ${path.module}/ansible/playbook-gradient-metal-ps-cloud-node.yaml
-        EOF
-    }
-}
-
-resource "paperspace_script" "autoscale" {
-    name = "Autoscale cluster"
-    description = "Autoscales cluster"
-    script_text = <<EOF
-        #!/usr/bin/env bash
-
-        sudo su -
-
-        until docker ps -a || (( count++ >= 30 )); do echo "Check if docker is up..."; sleep 2; done
-
-        sudo chmod 777 /var/run/docker.sock
-
-        echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
-        export MACHINE_ID=`curl https://metadata.paperspace.com/meta-data/machine | grep hostname | sed 's/^.*: "\(.*\)".*/\1/'` 
-        curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"$MACHINE_ID"}'
-
-        curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusters/updateCluster' -d '{"id":"${var.cluster_handle}", "scale": true }'
-    EOF
-    is_enabled = true
-    run_once = true
-}
-
-resource "paperspace_autoscaling_group" "main" {
-    for_each = local.asg_types
-    
-    name = "${var.cluster_handle}-${each.key}"
-    cluster_id = var.cluster_handle
-    machine_type = each.key == "cpu" ? var.machine_type_worker_cpu : var.machine_type_worker_gpu
-    template_id = each.key == "cpu" ? var.machine_template_id_cpu : var.machine_template_id_gpu
-    max = local.asg_max_sizes[each.key]
-    min = local.asg_min_sizes[each.key]
-    network_id = paperspace_network.network.handle
-    startup_script_id = paperspace_script.autoscale.id
-}
-
-resource "paperspace_machine" "gradient_workers_cpu" {
-    depends_on = [
-        paperspace_script.add_public_ssh_key,
-        tls_private_key.ssh_key,
-    ]
-
-    count = var.machine_count_worker_cpu
-    region = var.region
-    name = "${var.cluster_handle}-${var.name}-worker[-cpu-${count.index}"
-    machine_type = var.machine_type_worker_cpu
-    size = var.machine_storage_worker_cpu
-    billing_type = "hourly"
-    assign_public_ip = true
-    template_id = var.machine_template_id_cpu
-    user_id = data.paperspace_user.admin.id
-    team_id = data.paperspace_user.admin.team_id
-    script_id = paperspace_script.add_public_ssh_key.id
-    network_id = paperspace_network.network.handle
-    live_forever = true
-    is_managed = var.is_managed
-
-    provisioner "remote-exec" {
-        connection {
-            type     = "ssh"
-            user     = "paperspace"
-            host     = self.public_ip_address
-            private_key = tls_private_key.ssh_key.private_key_pem
-        }
-    } 
-
-    provisioner "local-exec" {
-        command = <<EOF
-            echo "${tls_private_key.ssh_key.private_key_pem}" > ${local.ssh_key_path} && chmod 600 ${local.ssh_key_path} && \
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
-            --key-file ${local.ssh_key_path} \
-            -i '${self.public_ip_address},' \
-            ${path.module}/ansible/playbook-gradient-metal-ps-cloud-node.yaml
-        EOF
-    }
-}
-
-resource "paperspace_machine" "gradient_workers_gpu" {
-    depends_on = [
-        paperspace_script.add_public_ssh_key,
-        tls_private_key.ssh_key,
-    ]
-
-    count = var.machine_count_worker_gpu
-    region = var.region
-    name = "${var.cluster_handle}-${var.name}-worker-gpu-${count.index}"
-    machine_type = var.machine_type_worker_gpu
-    size = var.machine_storage_worker_gpu
-    billing_type = "hourly"
-    assign_public_ip = true
-    template_id = var.machine_template_id_gpu
-    user_id = data.paperspace_user.admin.id
-    team_id = data.paperspace_user.admin.team_id
-    script_id = paperspace_script.add_public_ssh_key.id
-    network_id = paperspace_network.network.handle
-    live_forever = true
-    is_managed = var.is_managed
-
-    provisioner "remote-exec" {
-        connection {
-            type     = "ssh"
-            user     = "paperspace"
-            host     = self.public_ip_address
-            private_key = tls_private_key.ssh_key.private_key_pem
-        }
-    } 
-
-    provisioner "local-exec" {
-        command = <<EOF
-            echo "${tls_private_key.ssh_key.private_key_pem}" > ${local.ssh_key_path} && chmod 600 ${local.ssh_key_path} && \
-            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
-            --key-file ${local.ssh_key_path} \
-            -i '${self.public_ip_address},' \
-            ${path.module}/ansible/playbook-gradient-metal-ps-cloud-node.yaml
-        EOF
-    }
-}
-
+# TODO remove
 module "gradient_metal" {
     source = "../gradient-metal"
 
@@ -233,7 +51,7 @@ module "gradient_metal" {
     cluster_autoscaler_cloudprovider = local.cluster_autoscaler_cloudprovider
     cluster_autoscaler_enabled = local.cluster_autoscaler_enabled
     cluster_handle = var.cluster_handle
-    cluster_apikey = var.cluster_apikey
+  cluster_apikey                   = var.cluster_api_key
 
     domain = var.domain
     gradient_processing_version = var.gradient_processing_version
@@ -290,88 +108,57 @@ module "gradient_metal" {
     ssh_user = "paperspace"
 }
 
-resource "null_resource" "register_managed_cluster_network" {
-    depends_on = [module.gradient_metal]
+// Gradient
+module "gradient_processing" {
+  source  = "../modules/gradient-processing"
+  enabled = module.kubernetes.k8s_host == "" ? false : true
 
-    provisioner "local-exec" {
-        command = <<EOF
-            if [ ${var.is_managed} == true ] ; then
-                curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusters/updateCluster' -d '{"id":"${var.cluster_handle}", "attributes":{"networkId":"${paperspace_network.network.id}"}}'
-            fi
-        EOF
-    }
+  # TODO fill out correctly
+  amqp_hostname                         = var.amqp_hostname
+  amqp_port                             = var.amqp_port
+  amqp_protocol                         = var.amqp_protocol
+  artifacts_access_key_id               = var.artifacts_access_key_id
+  artifacts_object_storage_endpoint     = var.artifacts_object_storage_endpoint
+  artifacts_path                        = var.artifacts_path
+  artifacts_secret_access_key           = var.artifacts_secret_access_key
+  chart                                 = var.gradient_processing_chart
+  cluster_apikey                        = var.cluster_apikey
+  cluster_autoscaler_autoscaling_groups = var.cluster_autoscaler_autoscaling_groups
+  cluster_autoscaler_cloudprovider      = var.cluster_autoscaler_cloudprovider
+  cluster_autoscaler_enabled            = var.cluster_autoscaler_enabled
+  cluster_handle                        = var.cluster_handle
+  domain                                = var.domain
+
+  helm_repo_username      = var.helm_repo_username
+  helm_repo_password      = var.helm_repo_password
+  helm_repo_url           = var.helm_repo_url
+  elastic_search_host     = var.elastic_search_host
+  elastic_search_index    = var.elastic_search_index
+  elastic_search_password = var.elastic_search_password
+  elastic_search_port     = var.elastic_search_port
+  elastic_search_user     = var.elastic_search_user
+
+  label_selector_cpu       = var.cpu_selector
+  label_selector_gpu       = var.gpu_selector
+  letsencrypt_dns_name     = var.letsencrypt_dns_name
+  letsencrypt_dns_settings = var.letsencrypt_dns_settings
+  // Use shared storage by default for now
+  local_storage_server        = var.local_storage_server == "" ? var.shared_storage_server : var.local_storage_server
+  local_storage_path          = var.local_storage_path == "" ? var.shared_storage_path : var.local_storage_path
+  local_storage_type          = var.local_storage_type == "" ? local.shared_storage_type : var.local_storage_type
+  logs_host                   = var.logs_host
+  gradient_processing_version = var.gradient_processing_version
+  name                        = var.name
+  sentry_dsn                  = var.sentry_dsn
+  service_pool_name           = local.service_pool_name
+  shared_storage_server       = var.shared_storage_server
+  shared_storage_path         = var.shared_storage_path
+  shared_storage_type         = local.shared_storage_type
+  tls_cert                    = var.tls_cert
+  tls_key                     = var.tls_key
+  use_pod_anti_affinity       = var.use_pod_anti_affinity
+
+  providers = {
+    kubernetes = kubernetes
 }
-
-resource "null_resource" "register_managed_cluster_machine_main" {
-    depends_on = [module.gradient_metal]
-
-    provisioner "local-exec" {
-        command = <<EOF
-            if [ ${var.is_managed} == true ] ; then
-                curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"${paperspace_machine.gradient_main.id}"}'
-            fi
-        EOF
-    }
-}
-
-resource "null_resource" "register_managed_cluster_machine_workers_cpu" {
-    depends_on = [module.gradient_metal]
-
-    count = var.machine_count_worker_cpu
-
-    provisioner "local-exec" {
-        command = <<EOF
-            if [ ${var.is_managed} == true ] ; then
-                curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"${paperspace_machine.gradient_workers_cpu[count.index].id}"}'
-            fi
-        EOF
-    }
-}
-
-resource "null_resource" "register_managed_cluster_machine_workers_gpu" {
-    depends_on = [module.gradient_metal]
-
-    count = var.machine_count_worker_gpu
-
-    provisioner "local-exec" {
-        command = <<EOF
-            if [ ${var.is_managed} == true ] ; then
-                curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"${paperspace_machine.gradient_workers_gpu[count.index].id}"}'
-            fi
-        EOF
-    }
-}
-
-provider "cloudflare" {
-    version = "~> 2.0"
-    email   = var.cloudflare_email
-    api_key = var.cloudflare_api_key
-}
-
-resource "cloudflare_record" "subdomain" {
-    count = var.cloudflare_api_key == "" && var.cloudflare_email == "" && var.cloudflare_zone_id == "" ? 0 : 1
-    zone_id = var.cloudflare_zone_id
-    name    = var.domain
-    value   = paperspace_machine.gradient_main.public_ip_address
-    type    = "A"
-    ttl     = 3600
-    proxied = var.is_proxied
-}
-
-resource "cloudflare_record" "subdomain_wildcard" {
-    count = var.cloudflare_api_key == "" && var.cloudflare_email == "" && var.cloudflare_zone_id == "" ? 0 : 1
-    zone_id = var.cloudflare_zone_id
-    name    = "*.${var.domain}"
-    value   = paperspace_machine.gradient_main.public_ip_address
-    type    = "A"
-    ttl     = 3600
-    proxied = var.is_proxied
-}
-
-output "main_node_public_ip_address" {
-  value = paperspace_machine.gradient_main.public_ip_address
-}
-
-output "network_handle" {
-    value = paperspace_network.network.handle
 }
