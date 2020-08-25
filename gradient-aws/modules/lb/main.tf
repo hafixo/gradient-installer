@@ -41,7 +41,7 @@ resource "aws_elb" "main" {
   connection_draining_timeout = 400
 
   tags = {
-    "kubernetes.io/cluster/${var.name}"= "owned"
-    "kubernetes.io/service-name"= "default/traefik"
+    "kubernetes.io/cluster/${var.name}" = "owned"
+    "kubernetes.io/service-name"        = "default/traefik"
   }
 }

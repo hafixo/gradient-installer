@@ -1,6 +1,6 @@
 locals {
-    cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
-    cluster_autoscaler_enabled = var.is_managed ? true : false
+  cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
+  cluster_autoscaler_enabled       = var.is_managed ? true : false
 }
 
 module "pks" {
@@ -32,80 +32,80 @@ provider "kubernetes" {
 
 # TODO remove
 module "gradient_metal" {
-    source = "../gradient-metal"
+  source = "../gradient-metal"
 
-    name = var.name
+  name = var.name
 
-    amqp_hostname = var.amqp_hostname
+  amqp_hostname = var.amqp_hostname
 
-    artifacts_access_key_id = var.artifacts_access_key_id
-    artifacts_path = var.artifacts_path
-    artifacts_secret_access_key = var.artifacts_secret_access_key
-    sentry_dsn = var.sentry_dsn
+  artifacts_access_key_id     = var.artifacts_access_key_id
+  artifacts_path              = var.artifacts_path
+  artifacts_secret_access_key = var.artifacts_secret_access_key
+  sentry_dsn                  = var.sentry_dsn
 
-    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main : {
-        min: autoscaling_group.min
-        max: autoscaling_group.max
-        name: autoscaling_group.id
-    }]
-    cluster_autoscaler_cloudprovider = local.cluster_autoscaler_cloudprovider
-    cluster_autoscaler_enabled = local.cluster_autoscaler_enabled
-    cluster_handle = var.cluster_handle
+  cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main : {
+    min : autoscaling_group.min
+    max : autoscaling_group.max
+    name : autoscaling_group.id
+  }]
+  cluster_autoscaler_cloudprovider = local.cluster_autoscaler_cloudprovider
+  cluster_autoscaler_enabled       = local.cluster_autoscaler_enabled
+  cluster_handle                   = var.cluster_handle
   cluster_apikey                   = var.cluster_api_key
 
-    domain = var.domain
-    gradient_processing_version = var.gradient_processing_version
+  domain                      = var.domain
+  gradient_processing_version = var.gradient_processing_version
 
-    elastic_search_host = var.elastic_search_host
-    elastic_search_index = var.name
-    elastic_search_password = var.elastic_search_password
-    elastic_search_user = var.elastic_search_user
+  elastic_search_host     = var.elastic_search_host
+  elastic_search_index    = var.name
+  elastic_search_password = var.elastic_search_password
+  elastic_search_user     = var.elastic_search_user
 
-    helm_repo_password = var.helm_repo_password
-    helm_repo_username = var.helm_repo_username
-    helm_repo_url = var.helm_repo_url
-    kubeconfig_path = var.kubeconfig_path
+  helm_repo_password = var.helm_repo_password
+  helm_repo_username = var.helm_repo_username
+  helm_repo_url      = var.helm_repo_url
+  kubeconfig_path    = var.kubeconfig_path
 
-    logs_host = var.logs_host
-    letsencrypt_dns_name = var.letsencrypt_dns_name
-    letsencrypt_dns_settings = var.letsencrypt_dns_settings
-    traefik_prometheus_auth = var.traefik_prometheus_auth
+  logs_host                = var.logs_host
+  letsencrypt_dns_name     = var.letsencrypt_dns_name
+  letsencrypt_dns_settings = var.letsencrypt_dns_settings
+  traefik_prometheus_auth  = var.traefik_prometheus_auth
 
-    k8s_master_node = {
-        ip = paperspace_machine.gradient_main.public_ip_address
-        internal-address = paperspace_machine.gradient_main.private_ip_address
-        pool-type = "cpu"
-        pool-name = "metal-cpu"
-    }
-    k8s_workers = concat(
-        [
-            for cpu_worker in paperspace_machine.gradient_workers_cpu : {
-                ip = cpu_worker.public_ip_address
-                internal-address = cpu_worker.private_ip_address
-                pool-type = "cpu"
-                pool-name = "metal-cpu"
-            }
-        ],
-        [
-            for gpu_worker in paperspace_machine.gradient_workers_gpu : {
-                ip = gpu_worker.public_ip_address
-                internal-address = gpu_worker.private_ip_address
-                pool-type = "gpu"
-                pool-name = "metal-gpu"
-            }
-        ],
-        [ for worker in var.workers : {
-            ip = worker["ip"]
-            internal-address = worker["internal-address"]
-            pool-type = worker["machine_type"] == var.machine_type_worker_gpu ? "gpu" : "cpu"
-            pool-name = worker["machine_type"] == var.machine_type_worker_gpu ? "metal-gpu" : "metal-cpu"
-        }]
-    )
+  k8s_master_node = {
+    ip               = paperspace_machine.gradient_main.public_ip_address
+    internal-address = paperspace_machine.gradient_main.private_ip_address
+    pool-type        = "cpu"
+    pool-name        = "metal-cpu"
+  }
+  k8s_workers = concat(
+    [
+      for cpu_worker in paperspace_machine.gradient_workers_cpu : {
+        ip               = cpu_worker.public_ip_address
+        internal-address = cpu_worker.private_ip_address
+        pool-type        = "cpu"
+        pool-name        = "metal-cpu"
+      }
+    ],
+    [
+      for gpu_worker in paperspace_machine.gradient_workers_gpu : {
+        ip               = gpu_worker.public_ip_address
+        internal-address = gpu_worker.private_ip_address
+        pool-type        = "gpu"
+        pool-name        = "metal-gpu"
+      }
+    ],
+    [for worker in var.workers : {
+      ip               = worker["ip"]
+      internal-address = worker["internal-address"]
+      pool-type        = worker["machine_type"] == var.machine_type_worker_gpu ? "gpu" : "cpu"
+      pool-name        = worker["machine_type"] == var.machine_type_worker_gpu ? "metal-gpu" : "metal-cpu"
+    }]
+  )
 
-    shared_storage_path = "/srv/gradient"
-    shared_storage_server = paperspace_machine.gradient_main.private_ip_address
-    ssh_key = tls_private_key.ssh_key.private_key_pem
-    ssh_user = "paperspace"
+  shared_storage_path   = "/srv/gradient"
+  shared_storage_server = paperspace_machine.gradient_main.private_ip_address
+  ssh_key               = tls_private_key.ssh_key.private_key_pem
+  ssh_user              = "paperspace"
 }
 
 // Gradient
@@ -160,5 +160,5 @@ module "gradient_processing" {
 
   providers = {
     kubernetes = kubernetes
-}
+  }
 }

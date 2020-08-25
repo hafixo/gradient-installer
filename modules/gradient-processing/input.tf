@@ -1,44 +1,44 @@
 # AMQP
 variable "amqp_hostname" {
-    description = "AMQP hostname"
-    default = "broker.paperspace.io"
+  description = "AMQP hostname"
+  default     = "broker.paperspace.io"
 }
 
 variable "amqp_port" {
-    description = "AMQP port"
-    default = "5672"
+  description = "AMQP port"
+  default     = "5672"
 }
 variable "amqp_protocol" {
-    description = "AMQP protocol"
-    default = "amqps"
+  description = "AMQP protocol"
+  default     = "amqps"
 }
 
 
 # Cluster
 variable "artifacts_access_key_id" {
-    description = "S3 compatibile access key for artifacts object storage"
+  description = "S3 compatibile access key for artifacts object storage"
 }
 
 variable "artifacts_object_storage_endpoint" {
-    description = "Object storage endpoint to be used for Gradient"
+  description = "Object storage endpoint to be used for Gradient"
 }
 
 variable "artifacts_path" {
-    description = "Object storage path used for Gradient"
+  description = "Object storage path used for Gradient"
 }
 
 variable "artifacts_secret_access_key" {
-    description = "S3 compatible access key for artifacts object storage"
+  description = "S3 compatible access key for artifacts object storage"
 }
 
 variable "aws_region" {
-    description = "AWS region"
-    default = "us-east-1"
+  description = "AWS region"
+  default     = "us-east-1"
 }
 
 variable "chart" {
-    description = "Helm chart for gradient-processing"
-    default = "gradient-processing"
+  description = "Helm chart for gradient-processing"
+  default     = "gradient-processing"
 }
 
 variable "cluster_apikey" {
@@ -46,18 +46,18 @@ variable "cluster_apikey" {
 }
 
 variable "cluster_autoscaler_autoscaling_groups" {
-  type = list
+  type        = list
   description = "Cluster autoscaler autoscaling groups"
-  default = []
+  default     = []
 }
 variable "cluster_autoscaler_cloudprovider" {
-    description = "Cluster autoscaler provider"
-    default = "aws"
+  description = "Cluster autoscaler provider"
+  default     = "aws"
 }
 variable "cluster_autoscaler_enabled" {
-  type = bool
+  type        = bool
   description = "Enable cluster autoscaler"
-  default = false
+  default     = false
 }
 
 variable "cluster_handle" {
@@ -69,33 +69,33 @@ variable "domain" {
 }
 
 variable "elastic_search_host" {
-    description = "Elastic search host"
+  description = "Elastic search host"
 }
 variable "elastic_search_index" {
-    description = "Elastic search index"
-    default = ""
+  description = "Elastic search index"
+  default     = ""
 }
 
 # write only key
 variable "elastic_search_password" {
-    description = "Elastic search password"
+  description = "Elastic search password"
 
 }
 variable "elastic_search_port" {
-    description = "Elastic search port"
+  description = "Elastic search port"
 }
 variable "elastic_search_user" {
-    description = "Elastic search user"
+  description = "Elastic search user"
 }
 
 variable "enabled" {
-    description = "If module is enabled"
-    default = "true"
+  description = "If module is enabled"
+  default     = "true"
 }
 
 variable "global_selector" {
-    description = "Node selector prefix used globally"
-    default = ""
+  description = "Node selector prefix used globally"
+  default     = ""
 }
 
 variable "gradient_processing_version" {
@@ -104,12 +104,12 @@ variable "gradient_processing_version" {
 
 variable "label_selector_cpu" {
   description = "Node selector for cpu"
-  default = ""
+  default     = ""
 }
 
 variable "label_selector_gpu" {
   description = "Node selector for gpu"
-  default = ""
+  default     = ""
 }
 
 variable "letsencrypt_dns_name" {
@@ -117,7 +117,7 @@ variable "letsencrypt_dns_name" {
 }
 
 variable "letsencrypt_dns_settings" {
-  type = map
+  type        = map
   description = "letsencrypt dns settings"
 }
 
@@ -131,11 +131,11 @@ variable "name" {
 
 variable "local_storage_path" {
   description = "Local storage path "
-  default = "/"
+  default     = "/"
 }
 variable "local_storage_server" {
   description = "Local storage server"
-  default = ""
+  default     = ""
 }
 variable "local_storage_type" {
   description = "Local local storage type"
@@ -143,11 +143,11 @@ variable "local_storage_type" {
 
 variable "shared_storage_path" {
   description = "Shared storage path "
-  default = "/"
+  default     = "/"
 }
 variable "shared_storage_server" {
   description = "Shared storage server"
-  default = ""
+  default     = ""
 }
 
 variable "shared_storage_type" {
@@ -157,18 +157,18 @@ variable "shared_storage_type" {
 # k8s
 variable "k8s_namespace" {
   description = "K8s namespace"
-  default = "default"
+  default     = "default"
 }
 
 variable "minikube" {
-  type = bool
+  type        = bool
   description = "Set to true if minikube is being used"
-  default = false
+  default     = false
 }
 
 variable "service_pool_name" {
-    description = "Service pool node selector"
-    default = "services-small"
+  description = "Service pool node selector"
+  default     = "services-small"
 }
 
 variable "sentry_dsn" {
@@ -176,16 +176,16 @@ variable "sentry_dsn" {
 }
 
 variable "helm_repo_username" {
-    description = "Paperspace repo username"
-    default = ""
+  description = "Paperspace repo username"
+  default     = ""
 }
 variable "helm_repo_password" {
-    description = "Paperspace repo password"
-    default = ""
+  description = "Paperspace repo password"
+  default     = ""
 }
 variable "helm_repo_url" {
-    description = "Paperspace repo URL"
-    default = ""
+  description = "Paperspace repo URL"
+  default     = ""
 }
 
 # tls
@@ -197,6 +197,6 @@ variable "tls_key" {
 }
 
 variable "use_pod_anti_affinity" {
-    description = "Use pod antiaffinity"
-    default = "false"
+  description = "Use pod antiaffinity"
+  default     = "false"
 }

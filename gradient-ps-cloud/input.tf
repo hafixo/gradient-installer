@@ -3,7 +3,7 @@ variable "cluster_api_key" {
 }
 
 variable "is_managed" {
-    type = bool
-    description = "Is PS Cloud cluster managed by Paperspace"
-    default = false
+  type        = bool
+  description = "Is PS Cloud cluster managed by Paperspace"
+  default     = false
 }
