@@ -5,7 +5,7 @@ provider "aws" {
 locals {
     has_k8s = var.k8s_endpoint == "" ? false : true
     has_shared_storage = var.shared_storage_server == "" ? false : true
-    k8s_version = var.k8s_version == "" ? "1.14" : var.k8s_version
+    k8s_version = var.k8s_version == "" ? "1.15" : var.k8s_version
     shared_storage_type = var.shared_storage_type == "" ? "efs" : var.shared_storage_type
 }
 
