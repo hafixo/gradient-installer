@@ -214,7 +214,7 @@ traefik:
       enabled: true
       domainsList:
         - main: "*.${domain}"
-        - sans: 
+        - sans:
           - ${domain}
     challengeType: dns-01
     resolvers:
@@ -222,3 +222,7 @@ traefik:
     persistence:
       storageClass: ${shared_storage_name}
   %{ endif }
+
+argo:
+  nodeSelector:
+    paperspace.com/pool-name: ${service_pool_name}
