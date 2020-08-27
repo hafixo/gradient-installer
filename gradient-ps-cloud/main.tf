@@ -1,3 +1,12 @@
+terraform {
+    required_providers {
+        cloudflare = {
+            source  = "cloudflare/cloudflare"
+            version = "~> 2.10.0"
+        }
+    }
+}
+
 locals {
     cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
     cluster_autoscaler_enabled = var.is_managed ? true : false
