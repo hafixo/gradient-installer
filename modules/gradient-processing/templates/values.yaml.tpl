@@ -224,5 +224,6 @@ traefik:
   %{ endif }
 
 argo:
-  nodeSelector:
-    paperspace.com/pool-name: ${service_pool_name}
+  controller:
+    nodeSelector:
+      paperspace.com/pool-name: ${service_pool_name}
