@@ -35,6 +35,9 @@ global:
 cluster-autoscaler:
   enabled: ${cluster_autoscaler_enabled}
 
+  image:
+    tag: v1.15.7
+
   awsRegion: ${aws_region}
   autoDiscovery:
     clusterName: ${name}
@@ -214,7 +217,7 @@ traefik:
       enabled: true
       domainsList:
         - main: "*.${domain}"
-        - sans: 
+        - sans:
           - ${domain}
     challengeType: dns-01
     resolvers:
