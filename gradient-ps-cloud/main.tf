@@ -8,19 +8,11 @@ terraform {
 }
 
 locals {
+    autoscaling_groups = var.is_managed ? module.managed[0].autoscaling_groups : []
     cluster_autoscaler_cloudprovider = var.is_managed ? "paperspace" : ""
     cluster_autoscaler_enabled = var.is_managed ? true : false
 
     ssh_key_path = "${path.module}/ssh_key"
-}
-
-terraform {
-    required_providers {
-        cloudflare = {
-            source  = "cloudflare/cloudflare"
-            version = "~> 2.10.0"
-        }
-    }
 }
 
 provider "cloudflare" {
@@ -200,7 +192,7 @@ module "gradient_metal" {
     artifacts_secret_access_key = var.artifacts_secret_access_key
     sentry_dsn = var.sentry_dsn
 
-    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main : {
+    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in local.autoscaling_groups: {
         min: autoscaling_group.min
         max: autoscaling_group.max
         name: autoscaling_group.id
@@ -269,10 +261,22 @@ module "managed" {
     count = var.is_managed ? 1 : 0
     source = "./modules/managed"
 
+    api_host = var.api_host
+    asg_min_sizes = var.asg_min_sizes
+    asg_max_sizes = var.asg_max_sizes
     cloudflare_api_key = var.cloudflare_api_key
     cloudflare_email = var.cloudflare_email
     cloudflare_zone_id = var.cloudflare_zone_id
+    cluster_apikey = var.cluster_apikey
     cluster_handle = var.cluster_handle
+    domain = var.domain
+    cpu_worker_nodes = paperspace_machine.gradient_workers_cpu
+    gpu_worker_nodes = paperspace_machine.gradient_workers_gpu
+    network_handle = paperspace_network.network.handle
+    machine_template_id_cpu = var.machine_template_id_cpu
+    machine_template_id_gpu = var.machine_template_id_gpu
+    main_node = paperspace_machine.gradient_main
+    ssh_public_key = tls_private_key.ssh_key.public_key_openssh
 
     providers = {
         cloudflare = cloudflare

@@ -49,12 +49,6 @@ variable "is_managed" {
     default = false
 }
 
-variable "is_proxied" {
-    type = bool
-    description = "Should cluster proxy traffic through Cloudflare"
-    default = false
-}
-
 variable "machine_storage_main" {
     type = number
     description = "Main storage id"
