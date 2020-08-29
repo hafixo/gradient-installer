@@ -77,8 +77,8 @@ variable "machine_template_id_gpu" {
     default = "tmun4o2g"
 }
 
-variable "rancher_api_host" {
-    description = "Rancher API host"
+variable "rancher_api_url" {
+    description = "Rancher API URL"
 }
 variable "rancher_access_key" {
     description = "Rancher access_key"

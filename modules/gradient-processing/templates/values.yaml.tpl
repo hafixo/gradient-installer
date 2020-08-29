@@ -181,6 +181,97 @@ gradient-operator:
           requests:
             memory: 58Gi
     %{ endif }
+    %{ if cluster_autoscaler_cloudprovider == "paperspace" }
+    modelDeploymentConfig:
+      labelName: paperspace.com/pool-name
+      cpu:
+        small:
+          label: "C5"
+        medium:
+          label: "C7"
+        large:
+          label: "C10"
+      gpu:
+        small:
+          label: "P4000"
+          requests:
+            memory: 22.5Gi
+        medium:
+          label: "P5000"
+          requests:
+            memory: 22.5i
+        large:
+          label: "V100"
+          requests:
+            memory: 22.5Gi
+
+    experimentConfig:
+      labelName: paperspace.com/pool-name
+      cpu:
+        small:
+          label: "C5"
+        medium:
+          label: "C7"
+        large:
+          label: "C10"
+      gpu:
+        small:
+          label: "P4000"
+          requests:
+            memory: 22.5Gi
+        medium:
+          label: "P5000"
+          requests:
+            memory: 22.5i
+        large:
+          label: "V100"
+          requests:
+            memory: 22.5Gi
+    notebookConfig:
+      labelName: paperspace.com/pool-name
+      cpu:
+        small:
+          label: "C5"
+        medium:
+          label: "C7"
+        large:
+          label: "C10"
+      gpu:
+        small:
+          label: "P4000"
+          requests:
+            memory: 22.5Gi
+        medium:
+          label: "P5000"
+          requests:
+            memory: 22.5i
+        large:
+          label: "V100"
+          requests:
+            memory: 22.5Gi
+    tensorboardConfig:
+      labelName: paperspace.com/pool-name
+      cpu:
+        small:
+          label: "C5"
+        medium:
+          label: "C7"
+        large:
+          label: "C10"
+      gpu:
+        small:
+          label: "P4000"
+          requests:
+            memory: 22.5Gi
+        medium:
+          label: "P5000"
+          requests:
+            memory: 22.5i
+        large:
+          label: "V100"
+          requests:
+            memory: 22.5Gi
+    %{ endif }
 
 gradient-metrics:
   ingress:

@@ -42,17 +42,22 @@ locals {
     }, var.asg_min_sizes)
 
     asg_min_sizes = merge({
-        "C5"=10,
-        "C7"=10,
-        "C10"=10,
-        "P4000"=10,
-        "P5000"=10,
-        "V100"=10,
+        "C5"=0,
+        "C7"=0,
+        "C10"=0,
+        "P4000"=0,
+        "P5000"=0,
+        "V100"=0,
     }, var.asg_min_sizes)
 
     cluster_autoscaler_cloudprovider = "paperspace"
     cluster_autoscaler_enabled = true
+    k8s_version = var.k8s_version == "" ? "1.15.12" : var.k8s_version
+    kubeconfig = yamldecode(rancher2_cluster.main.kube_config)
 
+    storage_path = "/srg/gradient"
+    storage_server = paperspace_machine.gradient_main.public_ip_address
+    storage_type = "nfs"
     ssh_key_path = "${path.module}/ssh_key"
 }
 
@@ -65,6 +70,12 @@ provider "cloudflare" {
 provider "paperspace" {
     region = var.region
     api_key = var.admin_user_api_key
+}
+
+provider "rancher2" {
+    api_url = var.rancher_api_url
+    access_key = var.rancher_access_key
+    secret_key = var.rancher_secret_key
 }
 
 data "paperspace_user" "admin" {
@@ -82,15 +93,17 @@ resource "paperspace_script" "add_public_ssh_key" {
     script_text = <<EOF
         #!/bin/bash
         echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
+        ${rancher2_cluster.main.cluster_registration_token[0].node_command} \
+            --etcd --controlplane \
+            --address `curl -s https://metadata.paperspace.com/meta-data/machine | grep publicIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
+            --internal-address `curl -s https://metadata.paperspace.com/meta-data/machine | grep privateIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
+            --label=node-role.kubernetes.io/master= \
+            --label=node-role.kubernetes.io/controller=true \
+            --label=paperspace.com/pool-name=services-small \
+            --label=paperspace.com/pool-type=cpu
     EOF
     is_enabled = true
     run_once = true
-
-    provisioner "local-exec" {
-        command = <<EOF
-            sleep 20
-        EOF
-    }
 }
 
 resource "paperspace_network" "network" {
@@ -138,119 +151,80 @@ resource "paperspace_machine" "gradient_main" {
         EOF
     }
 }
-/*
-module "gradient_metal" {
-    source = "../gradient-metal"
 
-    name = var.name
+provider "helm" {
+    debug = true
+    version = "1.2.1"
+    kubernetes {
+        host     = local.kubeconfig["clusters"][0]["cluster"]["server"]
+        username = local.kubeconfig["users"][0]["name"]
+        password = local.kubeconfig["users"][0]["user"]["token"]
+
+        load_config_file = false
+    }
+}
+
+provider "kubernetes" {
+    host     = local.kubeconfig["clusters"][0]["cluster"]["server"]
+    username = local.kubeconfig["users"][0]["name"]
+    password = local.kubeconfig["users"][0]["user"]["token"]
+    
+    load_config_file = false
+}
+
+// Gradient
+module "gradient_processing" {
+	source = "../modules/gradient-processing"
 
     amqp_hostname = var.amqp_hostname
-
+    amqp_port = var.amqp_port
+    amqp_protocol = var.amqp_protocol
     artifacts_access_key_id = var.artifacts_access_key_id
+    artifacts_object_storage_endpoint = var.artifacts_object_storage_endpoint
     artifacts_path = var.artifacts_path
     artifacts_secret_access_key = var.artifacts_secret_access_key
-    sentry_dsn = var.sentry_dsn
-
-    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in local.autoscaling_groups: {
+    chart = var.gradient_processing_chart
+    cluster_apikey = var.cluster_apikey
+    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main: {
         min: autoscaling_group.min
         max: autoscaling_group.max
         name: autoscaling_group.id
     }]
-    cluster_autoscaler_cloudprovider = local.cluster_autoscaler_cloudprovider
-    cluster_autoscaler_enabled = local.cluster_autoscaler_enabled
+    cluster_autoscaler_cloudprovider = "paperspace"
+    cluster_autoscaler_enabled = true
     cluster_handle = var.cluster_handle
-    cluster_apikey = var.cluster_apikey
-
     domain = var.domain
-    gradient_processing_version = var.gradient_processing_version
 
+    helm_repo_username = var.helm_repo_username
+    helm_repo_password = var.helm_repo_password
+    helm_repo_url = var.helm_repo_url
     elastic_search_host = var.elastic_search_host
-    elastic_search_index = var.name
+    elastic_search_index = var.elastic_search_index
     elastic_search_password = var.elastic_search_password
+    elastic_search_port = var.elastic_search_port
     elastic_search_user = var.elastic_search_user
 
-    helm_repo_password = var.helm_repo_password
-    helm_repo_username = var.helm_repo_username
-    helm_repo_url = var.helm_repo_url
-    kubeconfig_path = var.kubeconfig_path
-
-    logs_host = var.logs_host
     letsencrypt_dns_name = var.letsencrypt_dns_name
     letsencrypt_dns_settings = var.letsencrypt_dns_settings
-    traefik_prometheus_auth = var.traefik_prometheus_auth
-
-    k8s_master_node = {
-        ip = paperspace_machine.gradient_main.public_ip_address
-        internal-address = paperspace_machine.gradient_main.private_ip_address
-        pool-type = "cpu"
-        pool-name = "metal-cpu"
-    }
-    k8s_workers = concat(
-        [
-            for cpu_worker in paperspace_machine.gradient_workers_cpu : {
-                ip = cpu_worker.public_ip_address
-                internal-address = cpu_worker.private_ip_address
-                pool-type = "cpu"
-                pool-name = "metal-cpu"
-            }
-        ],
-        [
-            for gpu_worker in paperspace_machine.gradient_workers_gpu : {
-                ip = gpu_worker.public_ip_address
-                internal-address = gpu_worker.private_ip_address
-                pool-type = "gpu"
-                pool-name = "metal-gpu"
-            }
-        ],
-        [ for worker in var.workers : {
-            ip = worker["ip"]
-            internal-address = worker["internal-address"]
-            pool-type = worker["machine_type"] == var.machine_type_worker_gpu ? "gpu" : "cpu"
-            pool-name = worker["machine_type"] == var.machine_type_worker_gpu ? "metal-gpu" : "metal-cpu"
-        }]
-    )
-
-    shared_storage_path = "/srv/gradient"
-    shared_storage_server = paperspace_machine.gradient_main.private_ip_address
-    ssh_key = tls_private_key.ssh_key.private_key_pem
-    ssh_user = "paperspace"
+    local_storage_server = local.storage_server
+    local_storage_path = local.storage_path
+    local_storage_type = local.storage_type
+    logs_host = var.logs_host
+    gradient_processing_version = var.gradient_processing_version
+    name = var.name
+    sentry_dsn = var.sentry_dsn
+    shared_storage_server = local.storage_server
+    shared_storage_path = local.storage_path
+    shared_storage_type = local.storage_type
+    tls_cert = var.tls_cert
+    tls_key = var.tls_key
 }
-*/
 
 resource "rancher2_cluster" "main" {
-  name = var.name
+  name = var.cluster_handle
   description = var.name
   rke_config {
-      nodes {
-            address = paperspace_machine.gradient_main.public_ip_address
-            internal_address = paperspace_machine.gradient_main.private_ip_address
-            labels = {
-                "node-role.kubernetes.io/master" = ""
-                "node-role.kubernetes.io/controller" = true
-                "paperspace.com/pool-name" = "services-small"
-                "paperspace.com/pool-type" = "cpu"
-            }
-            role = [
-                "controlplane",
-                "etcd",
-                "worker",
-            ]
-
-/*
-            "node-role.kubernetes.io/master" = ""
-            "node-role.kubernetes.io/controller" = true
-            "paperspace.com/pool-name" = var.service_pool_name
-            "paperspace.com/pool-type" = var.master_node["pool-type"]
-*/
-
-            ssh_key = tls_private_key.ssh_key.private_key_pem
-            user    = "paperspace"
-      }
-        ingress {
-            provider = "none"
-        }
-
-        kubernetes_version = "v${var.k8s_version}-rancher1-1"
+        kubernetes_version = "v${local.k8s_version}-rancher1-1"
         ingress {
             provider = "none"
         }
@@ -263,8 +237,9 @@ resource "rancher2_cluster" "main" {
   }
 }
 
-
-
+resource "rancher2_cluster_sync" "main" {
+  cluster_id =  rancher2_cluster.main.id
+}
 
 resource "paperspace_autoscaling_group" "main" {
     for_each = local.asg_types
