@@ -53,10 +53,10 @@ locals {
     cluster_autoscaler_cloudprovider = "paperspace"
     cluster_autoscaler_enabled = true
     k8s_version = var.k8s_version == "" ? "1.15.12" : var.k8s_version
-    kubeconfig = yamldecode(rancher2_cluster.main.kube_config)
+    kubeconfig = yamldecode(rancher2_cluster_sync.main.kube_config)
 
-    storage_path = "/srg/gradient"
-    storage_server = paperspace_machine.gradient_main.public_ip_address
+    storage_path = "/srv/gradient"
+    storage_server = paperspace_machine.gradient_main.private_ip_address
     storage_type = "nfs"
     ssh_key_path = "${path.module}/ssh_key"
 }
@@ -94,13 +94,11 @@ resource "paperspace_script" "add_public_ssh_key" {
         #!/bin/bash
         echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
         ${rancher2_cluster.main.cluster_registration_token[0].node_command} \
-            --etcd --controlplane \
+            --etcd --controlplane --worker \
+            --label paperspace.com/pool-name=services-small \
+            --label paperspace.com/pool-type=cpu \
             --address `curl -s https://metadata.paperspace.com/meta-data/machine | grep publicIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
-            --internal-address `curl -s https://metadata.paperspace.com/meta-data/machine | grep privateIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
-            --label=node-role.kubernetes.io/master= \
-            --label=node-role.kubernetes.io/controller=true \
-            --label=paperspace.com/pool-name=services-small \
-            --label=paperspace.com/pool-type=cpu
+            --internal-address `curl -s https://metadata.paperspace.com/meta-data/machine | grep privateIpAddress | sed 's/^.*: "\(.*\)".*/\1/'`
     EOF
     is_enabled = true
     run_once = true
@@ -157,8 +155,7 @@ provider "helm" {
     version = "1.2.1"
     kubernetes {
         host     = local.kubeconfig["clusters"][0]["cluster"]["server"]
-        username = local.kubeconfig["users"][0]["name"]
-        password = local.kubeconfig["users"][0]["user"]["token"]
+        token = local.kubeconfig["users"][0]["user"]["token"]
 
         load_config_file = false
     }
@@ -166,8 +163,7 @@ provider "helm" {
 
 provider "kubernetes" {
     host     = local.kubeconfig["clusters"][0]["cluster"]["server"]
-    username = local.kubeconfig["users"][0]["name"]
-    password = local.kubeconfig["users"][0]["user"]["token"]
+    token = local.kubeconfig["users"][0]["user"]["token"]
     
     load_config_file = false
 }
@@ -175,6 +171,7 @@ provider "kubernetes" {
 // Gradient
 module "gradient_processing" {
 	source = "../modules/gradient-processing"
+    enabled = rancher2_cluster_sync.main.id == "" ? false : true
 
     amqp_hostname = var.amqp_hostname
     amqp_port = var.amqp_port
@@ -251,12 +248,14 @@ resource "paperspace_autoscaling_group" "main" {
     max = local.asg_max_sizes[each.key]
     min = local.asg_min_sizes[each.key]
     network_id = paperspace_network.network.handle
-    startup_script_id = paperspace_script.autoscale.id
+    startup_script_id = paperspace_script.autoscale[each.key].id
 }
 
 resource "paperspace_script" "autoscale" {
-    name = "Autoscale cluster"
-    description = "Autoscales cluster"
+    for_each = local.asg_types
+
+    name = "Autoscale cluster ${each.key}"
+    description = "Autoscales cluster ${each.key}"
     script_text = <<EOF
         #!/usr/bin/env bash
 
@@ -267,7 +266,13 @@ resource "paperspace_script" "autoscale" {
         usermod -G docker paperspace
 
         echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
-        export MACHINE_ID=`curl https://metadata.paperspace.com/meta-data/machine | grep hostname | sed 's/^.*: "\(.*\)".*/\1/'` 
+        ${rancher2_cluster.main.cluster_registration_token[0].node_command} \
+            --worker \
+            --label paperspace.com/pool-name=${each.key} \
+            --label paperspace.com/pool-type=${each.value.type} \
+            --address `curl -s https://metadata.paperspace.com/meta-data/machine | grep publicIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
+            --internal-address `curl -s https://metadata.paperspace.com/meta-data/machine | grep privateIpAddress | sed 's/^.*: "\(.*\)".*/\1/'`
+
         curl -H 'Content-Type:application/json' -H 'X-API-Key: ${var.cluster_apikey}' -XPOST '${var.api_host}/clusterMachines/register' -d '{"clusterId":"${var.cluster_handle}", "machineId":"$MACHINE_ID"}'
     EOF
     is_enabled = true

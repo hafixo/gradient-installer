@@ -187,22 +187,34 @@ gradient-operator:
       cpu:
         small:
           label: "C5"
+          requests:
+            cpu: 3
+            memory: 6Gi
         medium:
           label: "C7"
+          requests:
+            cpu: 9
+            memory: 22.5Gi
         large:
           label: "C10"
+          requests:
+            cpu: 24
+            memory: 183Gi
       gpu:
         small:
           label: "P4000"
           requests:
+            cpu: 6
             memory: 22.5Gi
         medium:
           label: "P5000"
           requests:
-            memory: 22.5i
+            cpu: 6
+            memory: 22.5Gi
         large:
           label: "V100"
           requests:
+            cpu: 6
             memory: 22.5Gi
 
     experimentConfig:
@@ -210,66 +222,102 @@ gradient-operator:
       cpu:
         small:
           label: "C5"
+          requests:
+            cpu: 3
+            memory: 6Gi
         medium:
           label: "C7"
+          requests:
+            cpu: 9
+            memory: 22.5Gi
         large:
           label: "C10"
+          requests:
+            cpu: 24
+            memory: 183Gi
       gpu:
         small:
           label: "P4000"
           requests:
+            cpu: 6
             memory: 22.5Gi
         medium:
           label: "P5000"
           requests:
-            memory: 22.5i
+            cpu: 6
+            memory: 22.5Gi
         large:
           label: "V100"
           requests:
+            cpu: 6
             memory: 22.5Gi
     notebookConfig:
       labelName: paperspace.com/pool-name
       cpu:
         small:
           label: "C5"
+          requests:
+            cpu: 3
+            memory: 6Gi
         medium:
           label: "C7"
+          requests:
+            cpu: 9
+            memory: 22.5Gi
         large:
           label: "C10"
+          requests:
+            cpu: 24
+            memory: 183Gi
       gpu:
         small:
           label: "P4000"
           requests:
+            cpu: 6
             memory: 22.5Gi
         medium:
           label: "P5000"
           requests:
-            memory: 22.5i
+            cpu: 6
+            memory: 22.5Gi
         large:
           label: "V100"
           requests:
+            cpu: 6
             memory: 22.5Gi
     tensorboardConfig:
       labelName: paperspace.com/pool-name
       cpu:
         small:
           label: "C5"
+          requests:
+            cpu: 3
+            memory: 6Gi
         medium:
           label: "C7"
+          requests:
+            cpu: 9
+            memory: 22.5Gi
         large:
           label: "C10"
+          requests:
+            cpu: 24
+            memory: 183Gi
       gpu:
         small:
           label: "P4000"
           requests:
+            cpu: 6
             memory: 22.5Gi
         medium:
           label: "P5000"
           requests:
-            memory: 22.5i
+            cpu: 6
+            memory: 22.5Gi
         large:
           label: "V100"
           requests:
+            cpu: 6
             memory: 22.5Gi
     %{ endif }
 
@@ -312,7 +360,7 @@ traefik:
   nodeSelector:
     paperspace.com/pool-name: ${service_pool_name}
 
-  %{ if label_selector_cpu != "" && label_selector_gpu != "" }
+  %{ if (label_selector_cpu != "" && label_selector_gpu != "") || cluster_autoscaler_cloudprovider == "paperspace" }
   serviceType: NodePort
   deploymentStrategy:
     type: Recreate
