@@ -339,6 +339,8 @@ func setupSSL(terraformCommon *terraform.Common, terraformDir string) error {
 }
 
 func setupTerraformProvider(terraformProvider *terraform.TerraformProvider) error {
+	useSystemS3Credentials := true
+
 	println(cli.TextHeader("Configure an S3 bucket to store Terraform state"))
 	s3AccessKeyIDPrompt := cli.Prompt{
 		Label:          "Access Key ID",
@@ -373,17 +375,17 @@ func setupTerraformProvider(terraformProvider *terraform.TerraformProvider) erro
 		Label: "Endpoint",
 		Value: terraformProvider.Backends.S3.Endpoint,
 	}
+	useSystemS3CredentialsPrompt := cli.Prompt{
+		Label:         "Use system S3 credentials (~/.aws or environment variables)?",
+		Required:      true,
+		AllowedValues: cli.YesNoValues,
+		Value:         cli.BoolToYesNo(useSystemS3Credentials),
+	}
 
 	if err := s3BucketPrompt.Run(); err != nil {
 		return err
 	}
 	if err := s3KeyPrompt.Run(); err != nil {
-		return err
-	}
-	if err := s3AccessKeyIDPrompt.Run(); err != nil {
-		return err
-	}
-	if err := s3SecretAccessKeyPrompt.Run(); err != nil {
 		return err
 	}
 	if err := s3RegionPrompt.Run(); err != nil {
@@ -392,13 +394,29 @@ func setupTerraformProvider(terraformProvider *terraform.TerraformProvider) erro
 	if err := s3EndpointPrompt.Run(); err != nil {
 		return err
 	}
+	if err := useSystemS3CredentialsPrompt.Run(); err != nil {
+		return err
+	}
 
-	terraformProvider.Backends.S3.AccessKeyID = s3AccessKeyIDPrompt.Value
+	if !cli.YesNoToBool(useSystemS3CredentialsPrompt.Value) {
+		if err := s3AccessKeyIDPrompt.Run(); err != nil {
+			return err
+		}
+		if err := s3SecretAccessKeyPrompt.Run(); err != nil {
+			return err
+		}
+
+		terraformProvider.Backends.S3.AccessKeyID = s3AccessKeyIDPrompt.Value
+		terraformProvider.Backends.S3.SecretAccessKey = s3SecretAccessKeyPrompt.Value
+	} else {
+		terraformProvider.Backends.S3.AccessKeyID = ""
+		terraformProvider.Backends.S3.SecretAccessKey = ""
+	}
+
 	terraformProvider.Backends.S3.Bucket = s3BucketPrompt.Value
 	terraformProvider.Backends.S3.Endpoint = s3EndpointPrompt.Value
 	terraformProvider.Backends.S3.Key = s3KeyPrompt.Value
 	terraformProvider.Backends.S3.Region = s3RegionPrompt.Value
-	terraformProvider.Backends.S3.SecretAccessKey = s3SecretAccessKeyPrompt.Value
 
 	return nil
 }
@@ -415,13 +433,17 @@ func NewClusterUpCommand() *cobra.Command {
 			var id string
 
 			// Prepare args
+			client := cli.FromContext(cmd)
 			if len(args) > 0 {
 				id = args[0]
 			} else {
-				NewClusterRegisterCommand().ExecuteContext(cmd.Context())
+				var err error
+				id, err = ClusterRegister(client, "")
+				if err != nil {
+					return err
+				}
 			}
 			terraformDir := filepath.Join("clusters", id)
-			client := cli.FromContext(cmd)
 
 			// Check if cluster is valid
 			checkCluster, err := client.GetCluster(id, paperspace.ClusterGetParams{})
