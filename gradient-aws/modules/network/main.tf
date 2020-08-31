@@ -1,8 +1,9 @@
 locals {
+    az_count = length(var.availability_zones)
     cidr_netmask = split("/", var.cidr)[1]
     netmask_unit = var.subnet_netmask - local.cidr_netmask
-    private_cidr_blocks = [cidrsubnet(var.cidr, local.netmask_unit, 0)]
-    public_cidr_blocks = [cidrsubnet(var.cidr, local.netmask_unit, 1)]
+    private_cidr_blocks = [for count in range(local.az_count): cidrsubnet(var.cidr, local.netmask_unit, count)]
+    public_cidr_blocks = [for count in range(local.az_count): cidrsubnet(var.cidr, local.netmask_unit, local.az_count + count)]
 }
 
 resource "aws_eip" "nat" {
@@ -16,7 +17,7 @@ module "vpc" {
     name = var.name
     create_vpc = var.enable
 
-    azs = [var.availability_zone]
+    azs = var.availability_zones
     cidr = var.cidr
     enable_dns_hostnames = true
     enable_nat_gateway = true

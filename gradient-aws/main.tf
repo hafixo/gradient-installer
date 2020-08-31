@@ -23,7 +23,7 @@ data "aws_ec2_instance_type_offerings" "available" {
 }
 
 locals {
-    az = compact([for name in data.aws_availability_zones.available.names : length(data.aws_ec2_instance_type_offerings.available[name].instance_types) == length(local.instance_types) ? name : ""])[0]
+    az = compact([for name in data.aws_availability_zones.available.names : length(data.aws_ec2_instance_type_offerings.available[name].instance_types) == length(local.instance_types) ? name : ""])
     az_map = zipmap(data.aws_availability_zones.available.names, data.aws_availability_zones.available.names)
     
     has_k8s = var.k8s_endpoint == "" ? false : true
@@ -44,7 +44,7 @@ module "network" {
     source = "./modules/network"
     enable = !local.has_k8s
 
-    availability_zone = local.az
+    availability_zones = slice(local.az, 0, 2)
     cidr = var.cidr
     name = var.name
     private_subnet_tags = {

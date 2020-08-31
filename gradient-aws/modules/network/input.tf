@@ -1,4 +1,5 @@
-variable "availability_zone" {
+variable "availability_zones" {
+    type = list
     description = "Default availability zone"
 }
 
