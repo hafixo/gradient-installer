@@ -49,6 +49,7 @@ cluster-autoscaler:
   extraEnv:
     PAPERSPACE_DEBUG: true
     PAPERSPACE_CLUSTER_ID: ${cluster_handle}
+    PAPERSPACE_FORCE_PROVIDER: true
   extraEnvSecrets:
     PAPERSPACE_APIKEY:
       name: gradient-processing

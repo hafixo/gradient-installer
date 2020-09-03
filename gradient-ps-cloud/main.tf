@@ -182,11 +182,6 @@ module "gradient_processing" {
     artifacts_secret_access_key = var.artifacts_secret_access_key
     chart = var.gradient_processing_chart
     cluster_apikey = var.cluster_apikey
-    cluster_autoscaler_autoscaling_groups = [for autoscaling_group in paperspace_autoscaling_group.main: {
-        min: autoscaling_group.min
-        max: autoscaling_group.max
-        name: autoscaling_group.id
-    }]
     cluster_autoscaler_cloudprovider = "paperspace"
     cluster_autoscaler_enabled = true
     cluster_handle = var.cluster_handle
@@ -222,6 +217,7 @@ resource "rancher2_cluster" "main" {
   description = var.name
   rke_config {
         kubernetes_version = "v${local.k8s_version}-rancher1-1"
+        
         ingress {
             provider = "none"
         }
@@ -266,10 +262,12 @@ resource "paperspace_script" "autoscale" {
         usermod -G docker paperspace
 
         echo "${tls_private_key.ssh_key.public_key_openssh}" >> /home/paperspace/.ssh/authorized_keys
+        export MACHINE_ID=`curl -s https://metadata.paperspace.com/meta-data/machine | grep id | sed 's/^.*: "\(.*\)".*/\1/'`
         ${rancher2_cluster.main.cluster_registration_token[0].node_command} \
             --worker \
             --label paperspace.com/pool-name=${each.key} \
             --label paperspace.com/pool-type=${each.value.type} \
+            --node-name "$MACHINE_ID" \
             --address `curl -s https://metadata.paperspace.com/meta-data/machine | grep publicIpAddress | sed 's/^.*: "\(.*\)".*/\1/'` \
             --internal-address `curl -s https://metadata.paperspace.com/meta-data/machine | grep privateIpAddress | sed 's/^.*: "\(.*\)".*/\1/'`
 
