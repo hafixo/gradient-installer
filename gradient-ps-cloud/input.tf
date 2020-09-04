@@ -8,7 +8,7 @@ variable "admin_user_api_key" {
 
 variable "api_host" {
     description = "api host"
-    default = "api.paperspace.io"
+    default = "https://api.paperspace.io"
 }
 
 variable "asg_max_sizes" {

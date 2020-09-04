@@ -166,6 +166,11 @@ variable "minikube" {
   default = false
 }
 
+variable "paperspace_base_url" {
+  description = "Paperspace base URL"
+  default = "https://api.paperspace.io"
+}
+
 variable "service_pool_name" {
     description = "Service pool node selector"
     default = "services-small"

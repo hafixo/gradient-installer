@@ -95,6 +95,7 @@ resource "helm_release" "gradient_processing" {
             logs_host = var.logs_host
             name = var.name
             nfs_client_provisioner_enabled = var.shared_storage_type == "nfs" || var.local_storage_type == "nfs"
+            paperspace_base_url = var.paperspace_base_url
             sentry_dsn = var.sentry_dsn
             service_pool_name = var.service_pool_name
             shared_storage_name = local.shared_storage_name

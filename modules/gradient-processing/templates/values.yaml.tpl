@@ -47,6 +47,7 @@ cluster-autoscaler:
       maxSize: ${autoscaling_group["max"]}
     %{ endfor }
   extraEnv:
+    PAPERSPACE_BASE_URL: ${paperspace_base_url}
     PAPERSPACE_CLUSTER_ID: ${cluster_handle}
     PAPERSPACE_FORCE_PROVIDER: true
   extraEnvSecrets:

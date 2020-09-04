@@ -69,6 +69,7 @@ provider "cloudflare" {
 
 provider "paperspace" {
     region = var.region
+    api_host = var.api_host
     api_key = var.admin_user_api_key
 }
 
@@ -204,6 +205,7 @@ module "gradient_processing" {
     logs_host = var.logs_host
     gradient_processing_version = var.gradient_processing_version
     name = var.name
+    paperspace_base_url = var.api_host
     sentry_dsn = var.sentry_dsn
     shared_storage_server = local.storage_server
     shared_storage_path = local.storage_path
