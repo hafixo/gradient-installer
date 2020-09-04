@@ -38,7 +38,7 @@ cluster-autoscaler:
   image:
     pullPolicy: Always
     repository: paperspace/cluster-autoscaler
-    tag: v1.15-beta1
+    tag: v1.15
 
   autoscalingGroups:
     %{ for autoscaling_group in cluster_autoscaler_autoscaling_groups }
@@ -47,7 +47,6 @@ cluster-autoscaler:
       maxSize: ${autoscaling_group["max"]}
     %{ endfor }
   extraEnv:
-    PAPERSPACE_DEBUG: true
     PAPERSPACE_CLUSTER_ID: ${cluster_handle}
     PAPERSPACE_FORCE_PROVIDER: true
   extraEnvSecrets:
