@@ -103,6 +103,12 @@ resource "paperspace_script" "add_public_ssh_key" {
     EOF
     is_enabled = true
     run_once = true
+
+    provisioner "local-exec" {
+        command = <<EOF
+            sleep 20
+        EOF
+    }
 }
 
 resource "paperspace_network" "network" {
@@ -233,7 +239,12 @@ resource "rancher2_cluster" "main" {
 }
 
 resource "rancher2_cluster_sync" "main" {
-  cluster_id =  rancher2_cluster.main.id
+    depends_on = [paperspace_machine.gradient_main]
+    cluster_id =  rancher2_cluster.main.id
+
+    timeouts {
+        create = "8m"
+    }
 }
 
 resource "paperspace_autoscaling_group" "main" {

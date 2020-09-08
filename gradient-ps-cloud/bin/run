@@ -3,10 +3,9 @@
 # Note: Terraform reads vars from env vars that are prefixed TF_VARS_,
 # and they'll be named whatever the rest of the env var name is.
 
-if [ $TF_VAR_is_managed == "true" ] ; then
-  echo "Configuring managed backend..."
+echo "Configuring managed backend..."
 
-  cat << EOF > ./backend.tf
+cat << EOF > ./backend.tf
 terraform {
     backend "s3" {
         bucket = "${AWS_BUCKET}"
@@ -15,7 +14,6 @@ terraform {
     }
 }
 EOF
-fi
 
 terraform init
 terraform workspace new $TF_VAR_cluster_handle || true
