@@ -215,8 +215,12 @@ gradient-operator:
         large:
           label: "V100"
           requests:
+            nvidia.com/gpu: 1
             cpu: 6
             memory: 22.5Gi
+
+
+
 
     experimentConfig:
       labelName: paperspace.com/pool-name
@@ -250,6 +254,7 @@ gradient-operator:
         large:
           label: "V100"
           requests:
+            nvidia.com/gpu: 1
             cpu: 6
             memory: 22.5Gi
     notebookConfig:
@@ -284,6 +289,7 @@ gradient-operator:
         large:
           label: "V100"
           requests:
+            nvidia.com/gpu: 1
             cpu: 6
             memory: 22.5Gi
     tensorboardConfig:
@@ -318,6 +324,7 @@ gradient-operator:
         large:
           label: "V100"
           requests:
+            nvidia.com/gpu: 1
             cpu: 6
             memory: 22.5Gi
     %{ endif }
